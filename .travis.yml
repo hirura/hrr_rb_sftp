@@ -2,5 +2,24 @@
 language: ruby
 cache: bundler
 rvm:
-  - 2.7.1
-before_install: gem install bundler -v 2.1.4
+  - 2.0
+  - 2.1
+  - 2.2
+  - 2.3
+  - 2.4
+  - 2.5
+  - 2.6
+  - 2.7
+  - ruby-head
+jobs:
+  allow_failures:
+  - rvm: ruby-head
+before_install:
+  - gem uninstall -v '>= 2' -i $(rvm gemdir)@global -ax bundler || true
+  - gem install bundler -v '< 2'
+  - yes | gem update --system --force
+  - gem update bundler
+install:
+  - bundle install
+script:
+  - bundle exec rake spec
