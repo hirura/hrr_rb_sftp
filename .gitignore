@@ -9,3 +9,10 @@
 
 # rspec failure tracking
 .rspec_status
+
+# Bundler related files
+/Gemfile.lock
+/vendor
+
+# rbenv related files
+/.ruby-version
