@@ -8,3 +8,4 @@ module HrrRbSftp
 end
 
 require "hrr_rb_sftp/protocol/common/data_type/uint32"
+require 'hrr_rb_sftp/protocol/common/data_type/string'
