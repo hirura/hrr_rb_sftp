@@ -6,3 +6,5 @@ module HrrRbSftp
     end
   end
 end
+
+require "hrr_rb_sftp/protocol/common/data_type/uint32"
