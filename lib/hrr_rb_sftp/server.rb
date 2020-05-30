@@ -6,10 +6,13 @@ module HrrRbSftp
       self.logger = logger
     end
 
-    def start _in, _out, _err
-      @in  = _in
-      @out = _out
-      @err = _err
+    def start io_in, io_out, io_err
+      @io_in  = io_in
+      @io_out = io_out
+      @io_err = io_err
+
+      @receiver = Receiver.new(@io_in)
+      @sender   = Sender.new(@io_out)
     end
   end
 end
