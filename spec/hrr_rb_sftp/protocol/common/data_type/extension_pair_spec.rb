@@ -3,7 +3,7 @@ require "stringio"
 RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPair do
   describe ".encode" do
     context "when arg is an Array of two Strings" do
-      arg = {"extension-name": "name", "extension-data": "data"}
+      arg = {:"extension-name" => "name", :"extension-data" => "data"}
       encoded = [arg[:"extension-name"], arg[:"extension-data"]].map{ |e|
         [e.length.to_s.rjust(8, "0")].pack("H8") + e
       }.join
@@ -36,7 +36,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPair do
   end
 
   describe ".decode" do
-    arg = {"extension-name": "name", "extension-data": "data"}
+    arg = {:"extension-name" => "name", :"extension-data" => "data"}
     encoded = [arg[:"extension-name"], arg[:"extension-data"]].map{ |e|
       [e.length.to_s.rjust(8, "0")].pack("H8") + e
     }.join

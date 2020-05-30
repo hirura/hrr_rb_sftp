@@ -4,8 +4,8 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPairs do
   describe ".encode" do
     [
       [],
-      [{"extension-name": "name1", "extension-data": "data1"}],
-      [{"extension-name": "name1", "extension-data": "data1"}, {"extension-name": "name2", "extension-data": "data2"}],
+      [{:"extension-name" => "name1", :"extension-data" => "data1"}],
+      [{:"extension-name" => "name1", :"extension-data" => "data1"}, {:"extension-name" => "name2", :"extension-data" => "data2"}],
     ].each do |arg|
       context "when arg Array size is #{arg.size}" do
         encoded = arg.map{ |pair|
@@ -47,8 +47,8 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPairs do
   describe ".decode" do
     [
       [],
-      [{"extension-name": "name1", "extension-data": "data1"}],
-      [{"extension-name": "name1", "extension-data": "data1"}, {"extension-name": "name2", "extension-data": "data2"}],
+      [{:"extension-name" => "name1", :"extension-data" => "data1"}],
+      [{:"extension-name" => "name1", :"extension-data" => "data1"}, {:"extension-name" => "name2", :"extension-data" => "data2"}],
     ].each do |arg|
       context "when the number of pairs is #{arg.size}" do
         encoded = arg.map{ |pair|
