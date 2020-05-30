@@ -1,6 +1,7 @@
 RSpec.describe HrrRbSftp::Protocol::Common::Packet do
   let(:subclass){
     Class.new(described_class) do |klass|
+      klass::TYPE = 255
       klass::FORMAT = [
         [HrrRbSftp::Protocol::Common::DataType::Uint32, :'request-id'],
         [HrrRbSftp::Protocol::Common::DataType::String, :'data'      ],
@@ -18,8 +19,8 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packet do
     packet = {:'request-id' => 123, :'data' => 'testing'}
 
     context "when each arg is acceptable by data_type" do
-      it "encodes #{packet.inspect} to \"00 00 00 7B 00 00 00 07 t e s t i n g\"" do
-        expect( subclass.new.encode( packet ) ).to eq( ["0000007B", "00000007", "testing"].pack("H*H*a*") )
+      it "encodes #{packet.inspect} to \"FF 00 00 00 7B 00 00 00 07 t e s t i n g\"" do
+        expect( subclass.new.encode( packet ) ).to eq( ["FF", "0000007B", "00000007", "testing"].pack("H*H*H*a*") )
       end
     end
 
@@ -33,8 +34,8 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packet do
   describe "#decode" do
     packet = {:'request-id' => 123, :'data' => 'testing'}
 
-    it "decodes \"00 00 00 7B 00 00 00 07 t e s t i n g\" to #{packet.inspect}" do
-      expect( subclass.new.decode( ["0000007B", "00000007", "testing"].pack("H*H*a*") ) ).to eq packet
+    it "decodes \"FF 00 00 00 7B 00 00 00 07 t e s t i n g\" to #{packet.inspect}" do
+      expect( subclass.new.decode( ["FF", "0000007B", "00000007", "testing"].pack("H*H*H*a*") ) ).to eq packet
     end
   end
 end

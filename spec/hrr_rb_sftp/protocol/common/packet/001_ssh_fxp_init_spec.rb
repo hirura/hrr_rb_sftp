@@ -14,6 +14,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT do
   }
   let(:payload){
     [
+      HrrRbSftp::Protocol::Common::DataType::Byte.encode(type),
       HrrRbSftp::Protocol::Common::DataType::Uint32.encode(packet[:"version"]),
     ].join
   }

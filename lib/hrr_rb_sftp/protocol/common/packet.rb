@@ -11,7 +11,7 @@ module HrrRbSftp
         def encode packet
           log_debug { 'encoding packet: ' + packet.inspect }
           format = common_format
-          format.map{ |data_type, field_name|
+          DataType::Byte.encode(self.class::TYPE) + format.map{ |data_type, field_name|
             begin
               field_value = packet[field_name]
               data_type.encode field_value
@@ -24,6 +24,7 @@ module HrrRbSftp
 
         def decode payload
           payload_io = StringIO.new payload
+          payload_io.read(1)
           format = common_format
           decoded_packet = format.map{ |data_type, field_name|
             begin
