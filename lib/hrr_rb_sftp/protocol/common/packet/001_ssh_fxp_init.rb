@@ -1,5 +1,5 @@
 module HrrRbSftp
-  module Protocol
+  class Protocol
     module Common
       class Packet
         class SSH_FXP_INIT < Packet

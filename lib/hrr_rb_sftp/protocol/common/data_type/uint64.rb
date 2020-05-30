@@ -1,5 +1,5 @@
 module HrrRbSftp
-  module Protocol
+  class Protocol
     module Common
       module DataType
         module Uint64
