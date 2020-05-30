@@ -22,3 +22,4 @@ module HrrRbSftp
 end
 
 require "hrr_rb_sftp/protocol/common"
+require "hrr_rb_sftp/protocol/version1"
