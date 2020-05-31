@@ -5,3 +5,5 @@ module HrrRbSftp
     end
   end
 end
+
+require "hrr_rb_sftp/protocol/version1/data_type"
