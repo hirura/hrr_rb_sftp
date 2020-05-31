@@ -6,6 +6,7 @@ module HrrRbSftp
           TYPE = 2
 
           FORMAT = [
+            [DataType::Byte,           :"type"      ],
             [DataType::Uint32,         :"version"   ],
             [DataType::ExtensionPairs, :"extensions"],
           ]

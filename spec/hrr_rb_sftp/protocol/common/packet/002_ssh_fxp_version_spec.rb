@@ -9,13 +9,14 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packet::SSH_FXP_VERSION do
 
   let(:packet){
     {
+      :"type"       => type,
       :"version"    => 1,
       :"extensions" => [{:"extension-name" => "name1", :"extension-data" => "data1"}, {:"extension-name" => "name1", :"extension-data" => "data1"}],
     }
   }
   let(:payload){
     [
-      HrrRbSftp::Protocol::Common::DataType::Byte.encode(type),
+      HrrRbSftp::Protocol::Common::DataType::Byte.encode(packet[:"type"]),
       HrrRbSftp::Protocol::Common::DataType::Uint32.encode(packet[:"version"]),
       HrrRbSftp::Protocol::Common::DataType::ExtensionPairs.encode(packet[:"extensions"]),
     ].join
