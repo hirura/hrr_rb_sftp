@@ -1,7 +1,7 @@
 RSpec.describe HrrRbSftp::Protocol::Common::Packetable do
   let(:mixed_in){
     Class.new do |klass|
-      klass.include HrrRbSftp::Protocol::Common::Packetable
+      include HrrRbSftp::Protocol::Common::Packetable
       klass::TYPE = 255
       klass::FORMAT = [
         [HrrRbSftp::Protocol::Common::DataType::Uint32, :"request-id"],
