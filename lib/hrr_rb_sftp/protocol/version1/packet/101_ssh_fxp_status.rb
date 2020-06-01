@@ -1,8 +1,10 @@
 module HrrRbSftp
   class Protocol
     class Version1
-      class Packet
-        class SSH_FXP_STATUS < Packet
+      module Packet
+        class SSH_FXP_STATUS
+          include Common::Packetable
+
           TYPE = 101
 
           FORMAT = [

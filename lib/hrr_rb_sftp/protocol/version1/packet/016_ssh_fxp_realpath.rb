@@ -1,8 +1,10 @@
 module HrrRbSftp
   class Protocol
     class Version1
-      class Packet
-        class SSH_FXP_REALPATH < Packet
+      module Packet
+        class SSH_FXP_REALPATH
+          include Common::Packetable
+
           TYPE = 16
 
           FORMAT = [

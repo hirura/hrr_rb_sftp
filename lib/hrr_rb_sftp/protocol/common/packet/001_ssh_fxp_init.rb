@@ -1,8 +1,10 @@
 module HrrRbSftp
   class Protocol
     module Common
-      class Packet
-        class SSH_FXP_INIT < Packet
+      module Packet
+        class SSH_FXP_INIT
+          include Packetable
+
           TYPE = 1
 
           FORMAT = [

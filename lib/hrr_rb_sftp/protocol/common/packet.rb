@@ -1,8 +1,7 @@
 module HrrRbSftp
   class Protocol
     module Common
-      class Packet
-        include Packetable
+      module Packet
       end
     end
   end
