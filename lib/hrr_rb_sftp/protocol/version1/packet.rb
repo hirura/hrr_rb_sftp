@@ -26,3 +26,5 @@ module HrrRbSftp
     end
   end
 end
+
+require "hrr_rb_sftp/protocol/version1/packet/016_ssh_fxp_realpath"
