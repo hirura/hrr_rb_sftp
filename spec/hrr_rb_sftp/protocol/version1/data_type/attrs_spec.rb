@@ -162,14 +162,14 @@ RSpec.describe HrrRbSftp::Protocol::Version1::DataType::Attrs do
               context "with #{es.size} extensions" do
                 it "decodes as expected" do
                   io = StringIO.new (encoded + encoded_extended_count + encoded_extensions), "r"
-                  expect(described_class.decode io).to eq arg.merge({:"extensions" => es})
+                  expect(described_class.decode io).to eq arg.reject{|k,v| k == :"flags"}.merge({:"extensions" => es})
                 end
               end
             end
           else
             it "decodes as expected" do
               io = StringIO.new encoded, "r"
-              expect(described_class.decode io).to eq arg
+              expect(described_class.decode io).to eq arg.reject{|k,v| k == :"flags"}
             end
           end
         end

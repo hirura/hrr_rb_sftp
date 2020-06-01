@@ -36,7 +36,6 @@ module HrrRbSftp
           def self.decode io
             attrs = Hash.new
             flags                 = DataType::Uint32.decode(io)
-            attrs[:"flags"]       = flags
             attrs[:"size"]        = DataType::Uint64.decode(io)                                   unless (flags & SSH_FILEXFER_ATTR_SIZE).zero?
             attrs[:"uid"]         = DataType::Uint32.decode(io)                                   unless (flags & SSH_FILEXFER_ATTR_UIDGID).zero?
             attrs[:"gid"]         = DataType::Uint32.decode(io)                                   unless (flags & SSH_FILEXFER_ATTR_UIDGID).zero?
