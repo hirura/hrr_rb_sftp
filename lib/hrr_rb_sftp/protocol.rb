@@ -23,3 +23,4 @@ end
 
 require "hrr_rb_sftp/protocol/common"
 require "hrr_rb_sftp/protocol/version1"
+require "hrr_rb_sftp/protocol/version2"
