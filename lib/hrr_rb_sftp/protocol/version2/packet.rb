@@ -11,3 +11,5 @@ module HrrRbSftp
     end
   end
 end
+
+require "hrr_rb_sftp/protocol/version2/packet/018_ssh_fxp_rename"
