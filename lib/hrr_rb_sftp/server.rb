@@ -43,6 +43,12 @@ module HrrRbSftp
     end
 
     def respond_to_requests
+      protocol = Protocol.versions[@version].new(logger: logger)
+      while true
+        request = @receiver.receive
+        response = protocol.respond_to request
+        @sender.send response
+      end
     end
   end
 end

@@ -1,3 +1,5 @@
+require "fileutils"
+
 RSpec.describe HrrRbSftp::Server do
   let(:io){
     io_in  = IO.pipe
@@ -78,6 +80,98 @@ RSpec.describe HrrRbSftp::Server do
           packet = HrrRbSftp::Protocol::Common::Packet::SSH_FXP_VERSION.new.decode(payload)
           expect( packet[:"version"]    ).to eq version
           expect( packet[:"extensions"] ).to eq []
+        end
+      end
+    end
+  end
+
+  describe "#respond_to_requests" do
+    let(:init_packet){
+      {
+        :"type"    => HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT::TYPE,
+        :"version" => version,
+      }
+    }
+    let(:init_payload){
+      HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT.new.encode(init_packet)
+    }
+
+    before :example do
+      @thread = Thread.new{
+        server = described_class.new
+        server.start *io.local.to_a
+      }
+      io.remote.in.write ([init_payload.length].pack("N") + init_payload)
+      payload_length = io.remote.out.read(4).unpack("N")[0]
+      payload = io.remote.out.read(payload_length)
+    end
+
+    after :example do
+      @thread.kill
+    end
+
+    [1, 2].each do |version|
+      context "when remote protocol version is #{version}" do
+        let(:version){ version }
+        let(:version_class){ HrrRbSftp::Protocol.const_get(:"Version#{version}") }
+
+        context "when request type is invalid" do
+          let(:realpath_payload){
+            [
+              type,
+              request_id,
+            ].pack("CN")
+          }
+          let(:type){ 0 }
+          let(:request_id){ 1 }
+
+          it "returns status response" do
+            io.remote.in.write ([realpath_payload.length].pack("N") + realpath_payload)
+            payload_length = io.remote.out.read(4).unpack("N")[0]
+            payload = io.remote.out.read(payload_length)
+            expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+            packet = version_class::Packet::SSH_FXP_STATUS.new.decode(payload)
+            expect( packet[:"request-id"] ).to eq request_id
+            expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED
+          end
+        end
+
+        context "when request does not have request-id" do
+          let(:realpath_payload){
+            [
+              version_class::Packet::SSH_FXP_REALPATH::TYPE,
+            ].pack("C")
+          }
+
+          it "returns status response" do
+            io.remote.in.write ([realpath_payload.length].pack("N") + realpath_payload)
+            payload_length = io.remote.out.read(4).unpack("N")[0]
+            payload = io.remote.out.read(payload_length)
+            expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+            packet = version_class::Packet::SSH_FXP_STATUS.new.decode(payload)
+            expect( packet[:"request-id"] ).to eq 0
+            expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
+          end
+        end
+
+        context "when request does not have some fields" do
+          let(:realpath_payload){
+            [
+              version_class::Packet::SSH_FXP_REALPATH::TYPE,
+              request_id,
+            ].pack("CN")
+          }
+          let(:request_id){ 1 }
+
+          it "returns status response" do
+            io.remote.in.write ([realpath_payload.length].pack("N") + realpath_payload)
+            payload_length = io.remote.out.read(4).unpack("N")[0]
+            payload = io.remote.out.read(payload_length)
+            expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+            packet = version_class::Packet::SSH_FXP_STATUS.new.decode(payload)
+            expect( packet[:"request-id"] ).to eq request_id
+            expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
+          end
         end
       end
     end
