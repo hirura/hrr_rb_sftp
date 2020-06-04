@@ -317,7 +317,7 @@ RSpec.describe HrrRbSftp::Server do
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
-                expect( packet[:"error message"] ).to match /File name too long(?: @ rb_file_s_stat)? - #{path}/
+                expect( packet[:"error message"] ).to start_with "File name too long"
                 expect( packet[:"language tag"]  ).to eq ""
               end
             end
@@ -444,7 +444,7 @@ RSpec.describe HrrRbSftp::Server do
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
-                expect( packet[:"error message"] ).to match /File name too long(?: @ rb_file_s_rename)? - \(#{oldpath}, #{newpath}\)/
+                expect( packet[:"error message"] ).to start_with "File name too long"
                 expect( packet[:"language tag"]  ).to eq ""
               end
             end
