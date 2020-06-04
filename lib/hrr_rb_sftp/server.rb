@@ -22,7 +22,7 @@ module HrrRbSftp
 
     def negotiate_version
       remote_version = receive_fxp_init
-      @version = [remote_version, Protocol.versions.keys.max].min
+      @version = [remote_version, Protocol.versions.max].min
       send_fxp_version
     end
 
@@ -43,7 +43,7 @@ module HrrRbSftp
     end
 
     def respond_to_requests
-      protocol = Protocol.versions[@version].new(logger: logger)
+      protocol = Protocol.new(@version, logger: logger)
       while true
         request = @receiver.receive
         response = protocol.respond_to request

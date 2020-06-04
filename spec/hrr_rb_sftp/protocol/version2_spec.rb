@@ -6,6 +6,6 @@ RSpec.describe HrrRbSftp::Protocol::Version2 do
   end
 
   it "can be looked up in HrrRbSftp::Protocol.versions" do
-    expect( HrrRbSftp::Protocol.versions ).to include(protocol_version => described_class)
+    expect( HrrRbSftp::Protocol.versions ).to include(protocol_version)
   end
 end

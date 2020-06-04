@@ -1,19 +1,20 @@
 RSpec.describe HrrRbSftp::Protocol do
-  dummy_version = 987654321
+  dummy_version = "X"
 
   before :all do
-    @dummy_klass = Class.new(described_class) do |klass|
+    dummy_class = Class.new do |klass|
       klass::PROTOCOL_VERSION = dummy_version
     end
+    described_class.send(:const_set, :"Version#{dummy_version}", dummy_class)
   end
 
   after :all do
-    described_class.instance_variable_get("@subclasses").delete @dummy_klass
+    described_class.send(:remove_const, "Version#{dummy_version}")
   end
 
   describe ".versions" do
     it "returns {protocol_version => subclass} Hash" do
-      expect( described_class.versions ).to include(dummy_version => @dummy_klass)
+      expect( described_class.versions ).to include(dummy_version)
     end
   end
 end
