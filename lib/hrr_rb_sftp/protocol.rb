@@ -21,18 +21,22 @@ module HrrRbSftp
                             request_packet = @packets[request_type].decode request_payload
                           rescue => e
                             {
-                              :"type"       => @version_class::Packet::SSH_FXP_STATUS::TYPE,
-                              :"request-id" => (request_payload[1,4].unpack("N")[0] || 0),
-                              :"code"       => @version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE,
+                              :"type"          => @version_class::Packet::SSH_FXP_STATUS::TYPE,
+                              :"request-id"    => (request_payload[1,4].unpack("N")[0] || 0),
+                              :"code"          => @version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE,
+                              :"error message" => e.message,
+                              :"language tag"  => "",
                             }
                           else
                             @packets[request_type].respond_to request_packet
                           end
                         else
                           {
-                            :"type"       => @version_class::Packet::SSH_FXP_STATUS::TYPE,
-                            :"request-id" => (request_payload[1,4].unpack("N")[0] || 0),
-                            :"code"       => @version_class::Packet::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED,
+                            :"type"          => @version_class::Packet::SSH_FXP_STATUS::TYPE,
+                            :"request-id"    => (request_payload[1,4].unpack("N")[0] || 0),
+                            :"code"          => @version_class::Packet::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED,
+                            :"error message" => "Unsupported type: #{request_type}",
+                            :"language tag"  => "",
                           }
                         end
       response_type = response_packet[:"type"]

@@ -68,7 +68,7 @@ RSpec.describe HrrRbSftp::Server do
       @thread.kill
     end
 
-    [1, 2].each do |version|
+    [1, 2, 3].each do |version|
       context "when remote protocol version is #{version}" do
         let(:version){ version }
 
@@ -110,7 +110,7 @@ RSpec.describe HrrRbSftp::Server do
       @thread.kill
     end
 
-    [1, 2].each do |version|
+    [1, 2, 3].each do |version|
       context "when remote protocol version is #{version}" do
         let(:version){ version }
         let(:version_class){ HrrRbSftp::Protocol.const_get(:"Version#{version}") }
@@ -133,6 +133,10 @@ RSpec.describe HrrRbSftp::Server do
             packet = version_class::Packet::SSH_FXP_STATUS.new.decode(payload)
             expect( packet[:"request-id"] ).to eq request_id
             expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED
+            if version >= 3
+              expect( packet[:"error message"] ).to eq "Unsupported type: #{type}"
+              expect( packet[:"language tag"]  ).to eq ""
+            end
           end
         end
 
@@ -151,6 +155,10 @@ RSpec.describe HrrRbSftp::Server do
             packet = version_class::Packet::SSH_FXP_STATUS.new.decode(payload)
             expect( packet[:"request-id"] ).to eq 0
             expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
+            if version >= 3
+              expect( packet[:"error message"] ).to eq "undefined method `unpack' for nil:NilClass"
+              expect( packet[:"language tag"]  ).to eq ""
+            end
           end
         end
 
@@ -171,6 +179,10 @@ RSpec.describe HrrRbSftp::Server do
             packet = version_class::Packet::SSH_FXP_STATUS.new.decode(payload)
             expect( packet[:"request-id"] ).to eq request_id
             expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
+            if version >= 3
+              expect( packet[:"error message"] ).to eq "undefined method `unpack' for nil:NilClass"
+              expect( packet[:"language tag"]  ).to eq ""
+            end
           end
         end
 
@@ -255,6 +267,10 @@ RSpec.describe HrrRbSftp::Server do
               packet = version_class::Packet::SSH_FXP_STATUS.new.decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "No such file or directory"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
             end
           end
 
@@ -281,6 +297,10 @@ RSpec.describe HrrRbSftp::Server do
               packet = version_class::Packet::SSH_FXP_STATUS.new.decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "Permission denied"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
             end
           end
 
@@ -296,6 +316,10 @@ RSpec.describe HrrRbSftp::Server do
               packet = version_class::Packet::SSH_FXP_STATUS.new.decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "File name too long @ rb_file_s_stat - #{path}"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
             end
           end
         end
