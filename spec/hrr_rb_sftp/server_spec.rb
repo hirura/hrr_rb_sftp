@@ -173,6 +173,35 @@ RSpec.describe HrrRbSftp::Server do
             expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
           end
         end
+
+        context "when responding to realpath request" do
+          let(:realpath_packet){
+            {
+              :"type"       => version_class::Packet::SSH_FXP_REALPATH::TYPE,
+              :"request-id" => request_id,
+              :"path"       => path,
+            }
+          }
+          let(:realpath_payload){
+            version_class::Packet::SSH_FXP_REALPATH.new.encode(realpath_packet)
+          }
+
+          let(:request_id){ 1 }
+          let(:path){ "." }
+
+          it "returns name response" do
+            io.remote.in.write ([realpath_payload.length].pack("N") + realpath_payload)
+            payload_length = io.remote.out.read(4).unpack("N")[0]
+            payload = io.remote.out.read(payload_length)
+            expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_NAME::TYPE
+            packet = version_class::Packet::SSH_FXP_NAME.new.decode(payload)
+            expect( packet[:"request-id"]  ).to eq request_id
+            expect( packet[:"count"]       ).to eq 1
+            expect( packet[:"filename[0]"] ).to eq File.absolute_path(path)
+            expect( packet[:"longname[0]"] ).to eq File.absolute_path(path)
+            expect( packet[:"attrs[0]"]    ).to eq ({})
+          end
+        end
       end
     end
   end
