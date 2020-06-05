@@ -7,6 +7,7 @@ module HrrRbSftp
   end
 end
 
+require "hrr_rb_sftp/protocol/version1/packet/003_ssh_fxp_open"
 require "hrr_rb_sftp/protocol/version1/packet/016_ssh_fxp_realpath"
 require "hrr_rb_sftp/protocol/version1/packet/017_ssh_fxp_stat"
 require "hrr_rb_sftp/protocol/version1/packet/101_ssh_fxp_status"
