@@ -28,7 +28,7 @@ module HrrRbSftp
 
     def receive_fxp_init
       payload = @receiver.receive
-      packet = Protocol::Common::Packet::SSH_FXP_INIT.new(logger: logger).decode payload
+      packet = Protocol::Common::Packet::SSH_FXP_INIT.new({}, logger: logger).decode payload
       packet[:"version"]
     end
 
@@ -38,7 +38,7 @@ module HrrRbSftp
         :"version"    => @version,
         :"extensions" => [],
       }
-      payload = Protocol::Common::Packet::SSH_FXP_VERSION.new(logger: logger).encode packet
+      payload = Protocol::Common::Packet::SSH_FXP_VERSION.new({}, logger: logger).encode packet
       @sender.send payload
     end
 
