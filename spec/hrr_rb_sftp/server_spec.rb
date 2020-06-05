@@ -552,6 +552,126 @@ RSpec.describe HrrRbSftp::Server do
           end
         end
 
+        context "when responding to close request" do
+          context "when request is valid" do
+            let(:open_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_OPEN::TYPE,
+                :"request-id" => open_request_id,
+                :"filename"   => filename,
+                :"pflags"     => pflags,
+                :"attrs"      => attrs,
+              }
+            }
+            let(:open_payload){
+              version_class::Packet::SSH_FXP_OPEN.new({}).encode(open_packet)
+            }
+            let(:open_request_id){ 1 }
+            let(:filename){ "filename" }
+            let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_READ }
+            let(:attrs){ {} }
+            let(:content){ "content" }
+
+            let(:close_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_CLOSE::TYPE,
+                :"request-id" => close_request_id,
+                :"handle"     => @handle,
+              }
+            }
+            let(:close_payload){
+              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+            }
+            let(:close_request_id){ 2 }
+
+            before :example do
+              File.open(filename, "w"){ |f| f.write content }
+              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              @handle = packet[:"handle"]
+            end
+
+            after :example do
+              FileUtils.remove_entry_secure filename
+            end
+
+            it "returns status response" do
+              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq close_request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "Success"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+
+          context "when specified handle does not exist" do
+            let(:close_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_CLOSE::TYPE,
+                :"request-id" => close_request_id,
+                :"handle"     => handle,
+              }
+            }
+            let(:close_payload){
+              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+            }
+            let(:close_request_id){ 2 }
+            let(:handle){ "handle" }
+
+            it "returns status response" do
+              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq close_request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "Specified handle does not exist"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+
+          context "when request causes other error" do
+            let(:close_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_CLOSE::TYPE,
+                :"request-id" => close_request_id,
+                :"handle"     => handle,
+              }
+            }
+            let(:close_payload){
+              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+            }
+            let(:close_request_id){ 2 }
+            let(:handle){ "handle" }
+
+            it "returns status response" do
+              allow_any_instance_of(version_class::Packet::SSH_FXP_CLOSE).to receive(:close_and_delete_handle).and_raise("other error")
+              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq close_request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "other error"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+        end
+
         next if version < 2
 
         context "when responding to rename request" do
