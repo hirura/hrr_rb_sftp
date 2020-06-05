@@ -66,7 +66,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packetable do
 
     describe ".new" do
       it "does not take arguments" do
-        expect{ mixed_in.new }.not_to raise_error
+        expect{ mixed_in.new({}) }.not_to raise_error
       end
     end
 
@@ -124,7 +124,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packetable do
 
     describe ".new" do
       it "does not take arguments" do
-        expect{ mixed_in.new }.not_to raise_error
+        expect{ mixed_in.new({}) }.not_to raise_error
       end
     end
 
