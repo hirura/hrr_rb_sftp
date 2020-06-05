@@ -4,8 +4,10 @@ module HrrRbSftp
       module Packetable
         include Loggable
 
-        def initialize logger: nil
+        def initialize handles, logger: nil
           self.logger = logger
+
+          @handles = handles
         end
 
         def encode packet

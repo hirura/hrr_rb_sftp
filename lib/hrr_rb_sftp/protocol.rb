@@ -9,9 +9,11 @@ module HrrRbSftp
     def initialize version, logger: nil
       self.logger = logger
 
+      @handles = Hash.new
       @version = version
       @version_class = self.class.const_get(:"Version#{@version}")
-      @packets = @version_class::Packet.constants.select{|c| c.to_s.start_with?("SSH_FXP_")}.map{|c| @version_class::Packet.const_get(c)}.map{|pkt| [pkt::TYPE, pkt.new(logger: logger)]}.inject(Hash.new){|h,(k,v)| h.update({k => v})}
+      packet_classes = @version_class::Packet.constants.select{|c| c.to_s.start_with?("SSH_FXP_")}.map{|c| @version_class::Packet.const_get(c)}
+      @packets = packet_classes.map{|pkt| [pkt::TYPE, pkt.new(@handles, logger: logger)]}.inject(Hash.new){|h,(k,v)| h.update({k => v})}
     end
 
     def respond_to request_payload
