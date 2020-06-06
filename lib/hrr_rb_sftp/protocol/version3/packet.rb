@@ -9,4 +9,5 @@ module HrrRbSftp
 end
 
 require "hrr_rb_sftp/protocol/version3/packet/014_ssh_fxp_mkdir"
+require "hrr_rb_sftp/protocol/version3/packet/019_ssh_fxp_readlink"
 require "hrr_rb_sftp/protocol/version3/packet/101_ssh_fxp_status"
