@@ -1823,12 +1823,14 @@ RSpec.describe HrrRbSftp::Server do
               :"type"       => version_class::Packet::SSH_FXP_MKDIR::TYPE,
               :"request-id" => request_id,
               :"path"       => path,
+              :"attrs"      => attrs, # >= version 3
             }
           }
           let(:mkdir_payload){
             version_class::Packet::SSH_FXP_MKDIR.new({}).encode(mkdir_packet)
           }
           let(:request_id){ 1 }
+          let(:attrs){ {} }
 
           context "when request is valid" do
             let(:path){ "newdir" }
