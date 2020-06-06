@@ -1697,7 +1697,7 @@ RSpec.describe HrrRbSftp::Server do
                 packet[:"filename[3]"] => {:"longname" => packet[:"longname[3]"], :"attrs" => packet[:"attrs[3]"]},
               }
               expect( list.keys ).to match_array [".", "..", file, symlink]
-              expect( list["."][:"longname"]     ).to match /drwx------ ... ........ ........      128 Jan  1  1970 \./
+              expect( list["."][:"longname"]     ).to match /drwx------ ... ........ ........ ........ Jan  1  1970 \./
               expect( list["."][:"attrs"]        ).to eq path_attrs
               expect( list[".."][:"longname"]    ).to match /.......... ... ........ ........ ........ ... .. ..... \.\./
               expect( list[".."][:"attrs"]       ).to eq parent_attrs
