@@ -31,10 +31,22 @@ RSpec.describe HrrRbSftp::Server do
       described_class.new
     }
 
-    it "takes in, out, err arguments and starts negotiating version then responds to requests" do
-      expect( server ).to receive(:negotiate_version).with(no_args).once
-      expect( server ).to receive(:respond_to_requests).with(no_args).once
-      expect{ server.start *io.local.to_a }.not_to raise_error
+    [1, 2, 3].each do |version|
+      context "when remote protocol version is #{version}" do
+        it "takes in, out, err arguments and starts negotiating version then responds to requests" do
+          expect( server ).to receive(:negotiate_version).with(no_args).and_return(version).once
+          expect( server ).to receive(:respond_to_requests).with(no_args).once
+          expect( server ).to receive(:close_handles).with(no_args).once
+          expect{ server.start *io.local.to_a }.not_to raise_error
+        end
+
+        it "calls @protocol#close_handles even when #respond_to_requests raises an error" do
+          expect( server ).to receive(:negotiate_version).with(no_args).and_return(version).once
+          expect( server ).to receive(:respond_to_requests).with(no_args).and_raise(RuntimeError, "dummy error").once
+          expect( server ).to receive(:close_handles).with(no_args).once
+          expect{ server.start *io.local.to_a }.to raise_error RuntimeError, "dummy error"
+        end
+      end
     end
 
     it "raises an error when less than 3 arguments" do
@@ -47,6 +59,54 @@ RSpec.describe HrrRbSftp::Server do
   end
 
   describe "#negotiate_version" do
+    context "when input IO is closed before receiving SSH_FXP_INIT" do
+      it "raises an error when failed receiving SSH_FXP_INIT" do
+        io.remote.in.close
+        expect{ described_class.new.start *io.local.to_a }.to raise_error RuntimeError, "Failed receiving SSH_FXP_INIT"
+      end
+    end
+
+    context "when receiving valid SSH_FXP_INIT" do
+      let(:init_packet){
+        {
+          :"type"    => HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT::TYPE,
+          :"version" => version,
+        }
+      }
+      let(:init_payload){
+        HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT.new({}).encode(init_packet)
+      }
+
+      before :example do
+        @thread = Thread.new{
+          server = described_class.new
+          server.start *io.local.to_a
+        }
+      end
+
+      after :example do
+        @thread.kill
+      end
+
+      [1, 2, 3].each do |version|
+        context "when remote protocol version is #{version}" do
+          let(:version){ version }
+
+          it "receives init with version #{version} and returns version with version #{version}" do
+            io.remote.in.write ([init_payload.length].pack("N") + init_payload)
+            payload_length = io.remote.out.read(4).unpack("N")[0]
+            payload = io.remote.out.read(payload_length)
+            expect( payload[0].unpack("C")[0] ).to eq HrrRbSftp::Protocol::Common::Packet::SSH_FXP_VERSION::TYPE
+            packet = HrrRbSftp::Protocol::Common::Packet::SSH_FXP_VERSION.new({}).decode(payload)
+            expect( packet[:"version"]    ).to eq version
+            expect( packet[:"extensions"] ).to eq []
+          end
+        end
+      end
+    end
+  end
+
+  describe "#respond_to_requests" do
     let(:init_packet){
       {
         :"type"    => HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT::TYPE,
@@ -57,35 +117,70 @@ RSpec.describe HrrRbSftp::Server do
       HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT.new({}).encode(init_packet)
     }
 
-    before :example do
-      @thread = Thread.new{
-        server = described_class.new
-        server.start *io.local.to_a
-      }
-    end
+    let(:server){ described_class.new }
 
-    after :example do
-      @thread.kill
+    before :example do
+      io.remote.in.write ([init_payload.length].pack("N") + init_payload)
     end
 
     [1, 2, 3].each do |version|
       context "when remote protocol version is #{version}" do
         let(:version){ version }
 
-        it "receives init with version #{version} and returns version with version #{version}" do
-          io.remote.in.write ([init_payload.length].pack("N") + init_payload)
-          payload_length = io.remote.out.read(4).unpack("N")[0]
-          payload = io.remote.out.read(payload_length)
-          expect( payload[0].unpack("C")[0] ).to eq HrrRbSftp::Protocol::Common::Packet::SSH_FXP_VERSION::TYPE
-          packet = HrrRbSftp::Protocol::Common::Packet::SSH_FXP_VERSION.new({}).decode(payload)
-          expect( packet[:"version"]    ).to eq version
-          expect( packet[:"extensions"] ).to eq []
+        context "when input IO is closed before receiving packet length" do
+          before :example do
+            io.remote.in.close
+          end
+
+          it "is finished then calls close_handles" do
+            expect( server ).to receive(:close_handles).with(no_args).once
+            server.start *io.local.to_a
+          end
+        end
+
+        context "when input IO is closed just after receiving packet length" do
+          before :example do
+            io.remote.in.write [1].pack("N")
+            io.remote.in.close
+          end
+
+          it "is finished then calls close_handles" do
+            expect( server ).to receive(:close_handles).with(no_args).once
+            server.start *io.local.to_a
+          end
+        end
+
+        context "when input IO is closed during receiving payload" do
+          before :example do
+            io.remote.in.write [2].pack("N")
+            io.remote.in.write "a"
+            io.remote.in.close
+          end
+
+          it "is finished then calls close_handles" do
+            expect( server ).to receive(:close_handles).with(no_args).once
+            server.start *io.local.to_a
+          end
         end
       end
     end
   end
 
-  describe "#respond_to_requests" do
+  describe "#close_handles" do
+    let(:server){ described_class.new }
+    let(:protocol){ double("protocol") }
+
+    before :example do
+      server.instance_variable_set(:"@protocol", protocol)
+    end
+
+    it "calls @protocol#close_handles" do
+      expect( protocol ).to receive(:close_handles).with(no_args).once
+      server.send(:close_handles)
+    end
+  end
+
+  describe "request and response loop" do
     let(:init_packet){
       {
         :"type"    => HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT::TYPE,

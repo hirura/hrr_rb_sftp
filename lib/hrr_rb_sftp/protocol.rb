@@ -44,6 +44,15 @@ module HrrRbSftp
       response_type = response_packet[:"type"]
       @packets[response_type].encode response_packet
     end
+
+    def close_handles
+      log_info { "closing handles" }
+      @handles.each do |k, v|
+        v.close rescue nil
+      end
+      @handles.clear
+      log_info { "handles closed" }
+    end
   end
 end
 

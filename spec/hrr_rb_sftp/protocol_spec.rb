@@ -17,4 +17,20 @@ RSpec.describe HrrRbSftp::Protocol do
       expect( described_class.versions ).to include(dummy_version)
     end
   end
+
+  describe "#close_handles" do
+    let(:version){ 1 }
+    let(:protocol){ described_class.new version }
+    let(:handle){ double("handle") }
+
+    before :example do
+      protocol.instance_variable_get(:"@handles")["key"] = handle
+    end
+
+    it "closes handles" do
+      expect( handle ).to receive(:close).with(no_args).once
+      protocol.close_handles
+      expect( protocol.instance_variable_get(:"@handles") ).to eq ({})
+    end
+  end
 end
