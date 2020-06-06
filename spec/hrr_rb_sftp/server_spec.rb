@@ -1306,6 +1306,139 @@ RSpec.describe HrrRbSftp::Server do
           end
         end
 
+        context "when responding to fsetstat request" do
+          context "when request is valid" do
+            let(:open_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_OPEN::TYPE,
+                :"request-id" => open_request_id,
+                :"filename"   => filename,
+                :"pflags"     => pflags,
+                :"attrs"      => open_attrs,
+              }
+            }
+            let(:open_payload){
+              version_class::Packet::SSH_FXP_OPEN.new({}).encode(open_packet)
+            }
+            let(:open_request_id){ 1 }
+            let(:filename){ "filename" }
+            let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_READ }
+            let(:open_attrs){ {} }
+            let(:content){ "0123456789" }
+
+            let(:close_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_CLOSE::TYPE,
+                :"request-id" => close_request_id,
+                :"handle"     => @handle,
+              }
+            }
+            let(:close_payload){
+              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+            }
+            let(:close_request_id){ 20 }
+
+            let(:fsetstat_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_FSETSTAT::TYPE,
+                :"request-id" => fsetstat_request_id,
+                :"handle"     => @handle,
+                :"attrs"      => newattrs,
+              }
+            }
+            let(:fsetstat_payload){
+              version_class::Packet::SSH_FXP_FSETSTAT.new({}).encode(fsetstat_packet)
+            }
+            let(:fsetstat_request_id){ 10 }
+
+            let(:oldattrs){
+              stat = File.stat(filename)
+              attrs = Hash.new
+              attrs[:"permissions"] = stat.mode       if stat.mode
+              attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+              attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+              attrs
+            }
+            let(:newattrs){
+              attrs = Hash.new
+              attrs[:"permissions"] = 0100000 if oldattrs.has_key?(:"permissions")
+              attrs[:"atime"]       =       0 if oldattrs.has_key?(:"atime")
+              attrs[:"mtime"]       =       0 if oldattrs.has_key?(:"mtime")
+              attrs
+            }
+
+            before :example do
+              File.open(filename, "w"){ |f| f.write content }
+              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              @handle = packet[:"handle"]
+            end
+
+            after :example do
+              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              FileUtils.remove_entry_secure filename
+            end
+
+            it "returns status response" do
+              io.remote.in.write ([fsetstat_payload.length].pack("N") + fsetstat_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"]  ).to eq fsetstat_request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "Success"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+              expect( File.stat(filename).mode       ).to eq newattrs[:"permissions"]
+              expect( File.stat(filename).atime.to_i ).to eq newattrs[:"atime"]
+              expect( File.stat(filename).mtime.to_i ).to eq newattrs[:"mtime"]
+            end
+          end
+
+          context "when specified handle does not exist" do
+            let(:fsetstat_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_FSTAT::TYPE,
+                :"request-id" => fsetstat_request_id,
+                :"handle"     => handle,
+                :"attrs"      => newattrs,
+              }
+            }
+            let(:fsetstat_payload){
+              version_class::Packet::SSH_FXP_FSTAT.new({}).encode(fsetstat_packet)
+            }
+            let(:fsetstat_request_id){ 10 }
+            let(:handle){ "handle" }
+            let(:newattrs){
+              attrs = Hash.new
+              attrs[:"permissions"] = 0100000
+              attrs[:"atime"]       =       0
+              attrs[:"mtime"]       =       0
+              attrs
+            }
+
+            it "returns status response" do
+              io.remote.in.write ([fsetstat_payload.length].pack("N") + fsetstat_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq fsetstat_request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "Specified handle does not exist"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+        end
+
         next if version < 2
 
         context "when responding to rename request" do
