@@ -1561,6 +1561,194 @@ RSpec.describe HrrRbSftp::Server do
           end
         end
 
+        context "when responding to readdir request" do
+          context "when request is valid" do
+            let(:opendir_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_OPENDIR::TYPE,
+                :"request-id" => opendir_request_id,
+                :"path"       => path,
+              }
+            }
+            let(:opendir_payload){
+              version_class::Packet::SSH_FXP_OPENDIR.new({}).encode(opendir_packet)
+            }
+            let(:opendir_request_id){ 1 }
+            let(:path){ "dirX" }
+            let(:file){ "file" }
+            let(:symlink){ "symlink" }
+
+            let(:close_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_CLOSE::TYPE,
+                :"request-id" => close_request_id,
+                :"handle"     => @handle,
+              }
+            }
+            let(:close_payload){
+              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+            }
+            let(:close_request_id){ 20 }
+
+            let(:readdir_packet_0){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_READDIR::TYPE,
+                :"request-id" => readdir_request_id_0,
+                :"handle"     => @handle,
+              }
+            }
+            let(:readdir_payload_0){
+              version_class::Packet::SSH_FXP_READDIR.new({}).encode(readdir_packet_0)
+            }
+            let(:readdir_request_id_0){ 10 }
+
+            let(:readdir_packet_1){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_READDIR::TYPE,
+                :"request-id" => readdir_request_id_1,
+                :"handle"     => @handle,
+              }
+            }
+            let(:readdir_payload_1){
+              version_class::Packet::SSH_FXP_READDIR.new({}).encode(readdir_packet_1)
+            }
+            let(:readdir_request_id_1){ 11 }
+
+            let(:path_attrs){
+              stat = File.lstat(path)
+              attrs = Hash.new
+              attrs[:"size"]        = stat.size       if stat.size
+              attrs[:"uid"]         = stat.uid        if stat.uid && stat.uid
+              attrs[:"gid"]         = stat.gid        if stat.uid && stat.gid
+              attrs[:"permissions"] = stat.mode       if stat.mode
+              attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+              attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+              attrs
+            }
+            let(:file_attrs){
+              stat = File.lstat(File.join(path, file))
+              attrs = Hash.new
+              attrs[:"size"]        = stat.size       if stat.size
+              attrs[:"uid"]         = stat.uid        if stat.uid && stat.uid
+              attrs[:"gid"]         = stat.gid        if stat.uid && stat.gid
+              attrs[:"permissions"] = stat.mode       if stat.mode
+              attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+              attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+              attrs
+            }
+            let(:symlink_attrs){
+              stat = File.lstat(File.join(path, symlink))
+              attrs = Hash.new
+              attrs[:"size"]        = stat.size       if stat.size
+              attrs[:"uid"]         = stat.uid        if stat.uid && stat.uid
+              attrs[:"gid"]         = stat.gid        if stat.uid && stat.gid
+              attrs[:"permissions"] = stat.mode       if stat.mode
+              attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+              attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+              attrs
+            }
+            let(:parent_attrs){
+              stat = File.lstat(File.join(path, ".."))
+              attrs = Hash.new
+              attrs[:"size"]        = stat.size       if stat.size
+              attrs[:"uid"]         = stat.uid        if stat.uid && stat.uid
+              attrs[:"gid"]         = stat.gid        if stat.uid && stat.gid
+              attrs[:"permissions"] = stat.mode       if stat.mode
+              attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+              attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+              attrs
+            }
+
+            before :example do
+              Dir.mkdir(path)
+              FileUtils.touch(File.join(path, file))
+              File.symlink(File.join(path, file), File.join(path, symlink))
+              File.lchmod(0700, path)
+              File.lchmod(0600, File.join(path, file))
+              File.lchmod(0400, File.join(path, symlink))
+              File.lutime(0, 0, path)
+              time = Time.new(Time.now.year, 1, 2, 3, 4, nil, Time.now.utc_offset)
+              File.lutime(time, time, File.join(path, file))
+              File.lutime(0, 0, File.join(path, symlink))
+              io.remote.in.write ([opendir_payload.length].pack("N") + opendir_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              @handle = packet[:"handle"]
+            end
+
+            after :example do
+              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              FileUtils.remove_entry_secure path
+            end
+
+            it "returns name and then EOF status response" do
+              io.remote.in.write ([readdir_payload_0.length].pack("N") + readdir_payload_0)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_NAME::TYPE
+              packet = version_class::Packet::SSH_FXP_NAME.new({}).decode(payload)
+              expect( packet[:"request-id"]  ).to eq readdir_request_id_0
+              expect( packet[:"count"]       ).to eq 4
+              expect( packet[:"filename[0]"] ).to eq "."
+              expect( packet[:"longname[0]"] ).to match /drwx------ ... ........ ........      128 Jan  1  1970 \./
+              expect( packet[:"attrs[0]"]    ).to eq path_attrs
+              expect( packet[:"filename[1]"] ).to eq ".."
+              expect( packet[:"longname[1]"] ).to match /.......... ... ........ ........ ........ ... .. ..... \.\./
+              expect( packet[:"attrs[1]"]    ).to eq parent_attrs
+              expect( packet[:"filename[2]"] ).to eq symlink
+              expect( packet[:"longname[2]"] ).to match /lr--------   1 ........ ........        9 Jan  1  1970 #{symlink}/
+              expect( packet[:"attrs[2]"]    ).to eq symlink_attrs
+              expect( packet[:"filename[3]"] ).to eq file
+              expect( packet[:"longname[3]"] ).to match /-rw-------   1 ........ ........        0 Jan  2 03:04 #{file}/
+              expect( packet[:"attrs[3]"]    ).to eq file_attrs
+
+              io.remote.in.write ([readdir_payload_1.length].pack("N") + readdir_payload_1)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq readdir_request_id_1
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_EOF
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "End of file"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+
+          context "when specified handle does not exist" do
+            let(:readdir_packet){
+              {
+                :"type"       => version_class::Packet::SSH_FXP_READDIR::TYPE,
+                :"request-id" => readdir_request_id,
+                :"handle"     => handle,
+              }
+            }
+            let(:readdir_payload){
+              version_class::Packet::SSH_FXP_READDIR.new({}).encode(readdir_packet)
+            }
+            let(:readdir_request_id){ 10 }
+            let(:handle){ "handle" }
+
+            it "returns status response" do
+              io.remote.in.write ([readdir_payload.length].pack("N") + readdir_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq readdir_request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "Specified handle does not exist"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+        end
+
         next if version < 2
 
         context "when responding to rename request" do
