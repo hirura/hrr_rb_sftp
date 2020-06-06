@@ -5,8 +5,18 @@ module HrrRbSftp
     end
 
     def receive
-      paylaod_length = Protocol::Common::DataType::Uint32.decode(@io_in)
-      @io_in.read(paylaod_length)
+      begin
+        paylaod_length = Protocol::Common::DataType::Uint32.decode(@io_in)
+      rescue NoMethodError
+        nil
+      else
+        payload = @io_in.read(paylaod_length)
+        if payload.nil? || payload.length != paylaod_length
+          nil
+        else
+          payload
+        end
+      end
     end
   end
 end

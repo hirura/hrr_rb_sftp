@@ -3,6 +3,10 @@ require 'stringio'
 RSpec.describe HrrRbSftp::Receiver do
   let(:io_in){ StringIO.new String.new, 'r+' }
 
+  after :example do
+    io_in.close rescue nil
+  end
+
   describe ".new" do
     it "takes io_in argument" do
       expect{ described_class.new io_in }.not_to raise_error
@@ -14,18 +18,54 @@ RSpec.describe HrrRbSftp::Receiver do
     let(:payload){ "testing" }
     let(:payload_with_length){ [payload.length.to_s.rjust(8, "0"), payload].pack("H8" "a#{payload.length}") }
 
-    before :example do
-      io_in.write payload_with_length
-      io_in.rewind
+    context "when receiving correct payload" do
+      before :example do
+        io_in.write payload_with_length
+        io_in.rewind
+      end
+
+      it "returns expected payload" do
+        expect(receiver.receive).to eq payload
+      end
+
+      it "reads all" do
+        receiver.receive
+        expect(io_in.eof?).to be true
+      end
     end
 
-    it "returns expected payload" do
-      expect(receiver.receive).to eq payload
+    context "when io_in is closed before receiving packet length" do
+      before :example do
+        io_in.close_write
+      end
+
+      it "returns nil" do
+        expect(receiver.receive).to be nil
+      end
     end
 
-    it "reads all" do
-      receiver.receive
-      expect(io_in.eof?).to be true
+    context "when io_in is closed just after receiving packet length" do
+      before :example do
+        io_in.write payload_with_length[0,4]
+        io_in.close_write
+        io_in.rewind
+      end
+
+      it "returns nil" do
+        expect(receiver.receive).to be nil
+      end
+    end
+
+    context "when io_in is closed during receiving payload" do
+      before :example do
+        io_in.write payload_with_length[0,5]
+        io_in.close_write
+        io_in.rewind
+      end
+
+      it "returns nil" do
+        expect(receiver.receive).to be nil
+      end
     end
   end
 end
