@@ -1663,9 +1663,8 @@ RSpec.describe HrrRbSftp::Server do
               Dir.mkdir(path)
               FileUtils.touch(File.join(path, file))
               File.symlink(File.join(path, file), File.join(path, symlink))
-              File.lchmod(0700, path)
-              File.lchmod(0600, File.join(path, file))
-              File.lchmod(0400, File.join(path, symlink))
+              File.chmod(0700, path)
+              File.chmod(0600, File.join(path, file))
               File.lutime(0, 0, path)
               time = Time.new(Time.now.year, 1, 2, 3, 4, nil, Time.now.utc_offset)
               File.lutime(time, time, File.join(path, file))
@@ -1699,7 +1698,7 @@ RSpec.describe HrrRbSftp::Server do
               expect( packet[:"longname[1]"] ).to match /.......... ... ........ ........ ........ ... .. ..... \.\./
               expect( packet[:"attrs[1]"]    ).to eq parent_attrs
               expect( packet[:"filename[2]"] ).to eq symlink
-              expect( packet[:"longname[2]"] ).to match /lr--------   1 ........ ........        9 Jan  1  1970 #{symlink}/
+              expect( packet[:"longname[2]"] ).to match /l.........   1 ........ ........        9 Jan  1  1970 #{symlink}/
               expect( packet[:"attrs[2]"]    ).to eq symlink_attrs
               expect( packet[:"filename[3]"] ).to eq file
               expect( packet[:"longname[3]"] ).to match /-rw-------   1 ........ ........        0 Jan  2 03:04 #{file}/
