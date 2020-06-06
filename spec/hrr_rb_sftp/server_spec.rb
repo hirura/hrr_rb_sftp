@@ -1690,18 +1690,21 @@ RSpec.describe HrrRbSftp::Server do
               packet = version_class::Packet::SSH_FXP_NAME.new({}).decode(payload)
               expect( packet[:"request-id"]  ).to eq readdir_request_id_0
               expect( packet[:"count"]       ).to eq 4
-              expect( packet[:"filename[0]"] ).to eq "."
-              expect( packet[:"longname[0]"] ).to match /drwx------ ... ........ ........      128 Jan  1  1970 \./
-              expect( packet[:"attrs[0]"]    ).to eq path_attrs
-              expect( packet[:"filename[1]"] ).to eq ".."
-              expect( packet[:"longname[1]"] ).to match /.......... ... ........ ........ ........ ... .. ..... \.\./
-              expect( packet[:"attrs[1]"]    ).to eq parent_attrs
-              expect( packet[:"filename[2]"] ).to eq symlink
-              expect( packet[:"longname[2]"] ).to match /l.........   1 ........ ........ ........ ... .. ..... #{symlink}/
-              expect( packet[:"attrs[2]"]    ).to eq symlink_attrs
-              expect( packet[:"filename[3]"] ).to eq file
-              expect( packet[:"longname[3]"] ).to match /-rw-------   1 ........ ........        0 Jan  2 03:04 #{file}/
-              expect( packet[:"attrs[3]"]    ).to eq file_attrs
+              list = {
+                packet[:"filename[0]"] => {:"longname" => packet[:"longname[0]"], :"attrs" => packet[:"attrs[0]"]},
+                packet[:"filename[1]"] => {:"longname" => packet[:"longname[1]"], :"attrs" => packet[:"attrs[1]"]},
+                packet[:"filename[2]"] => {:"longname" => packet[:"longname[2]"], :"attrs" => packet[:"attrs[2]"]},
+                packet[:"filename[3]"] => {:"longname" => packet[:"longname[3]"], :"attrs" => packet[:"attrs[3]"]},
+              }
+              expect( list.keys ).to match_array [".", "..", file, symlink]
+              expect( list["."][:"longname"]     ).to match /drwx------ ... ........ ........      128 Jan  1  1970 \./
+              expect( list["."][:"attrs"]        ).to eq path_attrs
+              expect( list[".."][:"longname"]    ).to match /.......... ... ........ ........ ........ ... .. ..... \.\./
+              expect( list[".."][:"attrs"]       ).to eq parent_attrs
+              expect( list[file][:"longname"]    ).to match /-rw-------   1 ........ ........        0 Jan  2 03:04 #{file}/
+              expect( list[file][:"attrs"]       ).to eq file_attrs
+              expect( list[symlink][:"longname"] ).to match /l.........   1 ........ ........ ........ ... .. ..... #{symlink}/
+              expect( list[symlink][:"attrs"]    ).to eq symlink_attrs
 
               io.remote.in.write ([readdir_payload_1.length].pack("N") + readdir_payload_1)
               payload_length = io.remote.out.read(4).unpack("N")[0]
