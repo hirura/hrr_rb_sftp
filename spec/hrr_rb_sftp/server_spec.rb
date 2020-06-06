@@ -2458,6 +2458,123 @@ RSpec.describe HrrRbSftp::Server do
             end
           end
         end
+
+        context "when responding to symlink request" do
+          let(:symlink_packet){
+            {
+              :"type"       => version_class::Packet::SSH_FXP_SYMLINK::TYPE,
+              :"request-id" => request_id,
+              :"linkpath"   => linkpath,
+              :"targetpath" => targetpath,
+            }
+          }
+          let(:symlink_payload){
+            version_class::Packet::SSH_FXP_SYMLINK.new({}).encode(symlink_packet)
+          }
+
+          context "when request is valid" do
+            let(:request_id){ 1 }
+            let(:linkpath){ "linkpath" }
+            let(:targetpath){ "targetpath" }
+
+            after :example do
+              FileUtils.remove_entry_secure(linkpath)
+            end
+
+            it "returns name response" do
+              io.remote.in.write ([symlink_payload.length].pack("N") + symlink_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "Success"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+              expect( File.symlink?(linkpath) ).to be true
+            end
+          end
+
+          context "when request linkpath is not accessible" do
+            let(:request_id){ 1 }
+            let(:linkpath){ "dir000/linkpath" }
+            let(:targetpath){ "targetpath" }
+
+            before :example do
+              Dir.mkdir(File.dirname(linkpath))
+              FileUtils.chmod(0000, File.dirname(linkpath))
+            end
+
+            after :example do
+              FileUtils.chmod(0755, File.dirname(linkpath))
+              FileUtils.remove_entry_secure(File.dirname(linkpath))
+            end
+
+            it "returns status response" do
+              io.remote.in.write ([symlink_payload.length].pack("N") + symlink_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "Permission denied"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+
+          context "when request linkpath already exists" do
+            let(:request_id){ 1 }
+            let(:linkpath){ "linkpath" }
+            let(:targetpath){ "targetpath" }
+
+            before :example do
+              FileUtils.touch(linkpath)
+            end
+
+            after :example do
+              FileUtils.remove_entry_secure(linkpath)
+            end
+
+            it "returns status response" do
+              io.remote.in.write ([symlink_payload.length].pack("N") + symlink_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "File exists"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+
+          context "when request path causes other error" do
+            let(:request_id){ 1 }
+            let(:linkpath){ ("a".."z").to_a.join * 10 }
+            let(:targetpath){ "targetpath" }
+
+            it "returns status response" do
+              io.remote.in.write ([symlink_payload.length].pack("N") + symlink_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+              if version >= 3
+                expect( packet[:"error message"] ).to start_with "File name too long"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+        end
       end
     end
   end
