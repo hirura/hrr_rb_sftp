@@ -324,6 +324,113 @@ RSpec.describe HrrRbSftp::Server do
           end
         end
 
+        context "when responding to lstat request" do
+          let(:lstat_packet){
+            {
+              :"type"       => version_class::Packet::SSH_FXP_LSTAT::TYPE,
+              :"request-id" => request_id,
+              :"path"       => path,
+            }
+          }
+          let(:lstat_payload){
+            version_class::Packet::SSH_FXP_LSTAT.new({}).encode(lstat_packet)
+          }
+
+          context "when request is valid" do
+            let(:request_id){ 1 }
+            let(:path){ File.expand_path(".") }
+            let(:attrs){
+              stat = File.lstat(path)
+              attrs = Hash.new
+              attrs[:"size"]        = stat.size       if stat.size
+              attrs[:"uid"]         = stat.uid        if stat.uid && stat.uid
+              attrs[:"gid"]         = stat.gid        if stat.uid && stat.gid
+              attrs[:"permissions"] = stat.mode       if stat.mode
+              attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+              attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+              attrs
+            }
+
+            it "returns attrs response" do
+              io.remote.in.write ([lstat_payload.length].pack("N") + lstat_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_ATTRS::TYPE
+              packet = version_class::Packet::SSH_FXP_ATTRS.new({}).decode(payload)
+              expect( packet[:"request-id"]  ).to eq request_id
+              expect( packet[:"attrs"]       ).to eq attrs
+            end
+          end
+
+          context "when request path does not exist" do
+            let(:request_id){ 1 }
+            let(:path){ "does/not/exist" }
+
+            it "returns status response" do
+              io.remote.in.write ([lstat_payload.length].pack("N") + lstat_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "No such file or directory"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+
+          context "when request path is not accessible" do
+            let(:request_id){ 1 }
+            let(:path){ "dir000/file" }
+
+            before :example do
+              Dir.mkdir(File.dirname(path))
+              FileUtils.touch(path)
+              FileUtils.chmod(0000, File.dirname(path))
+            end
+
+            after :example do
+              FileUtils.chmod(0755, File.dirname(path))
+              FileUtils.remove_entry_secure(File.dirname(path))
+            end
+
+            it "returns status response" do
+              io.remote.in.write ([lstat_payload.length].pack("N") + lstat_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "Permission denied"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+
+          context "when request path causes other error" do
+            let(:request_id){ 1 }
+            let(:path){ ("a".."z").to_a.join * 10 }
+
+            it "returns status response" do
+              io.remote.in.write ([lstat_payload.length].pack("N") + lstat_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+              if version >= 3
+                expect( packet[:"error message"] ).to start_with "File name too long"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+        end
+
         context "when responding to open request" do
           let(:open_packet){
             {
