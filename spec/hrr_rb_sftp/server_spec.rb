@@ -2575,6 +2575,38 @@ RSpec.describe HrrRbSftp::Server do
             end
           end
         end
+
+        context "when responding to extended request" do
+          let(:extended_packet){
+            {
+              :"type"             => version_class::Packet::SSH_FXP_EXTENDED::TYPE,
+              :"request-id"       => request_id,
+              :"extended-request" => extended_request,
+            }
+          }
+          let(:extended_payload){
+            version_class::Packet::SSH_FXP_EXTENDED.new({}).encode(extended_packet)
+          }
+
+          context "when request is valid" do
+            let(:request_id){ 1 }
+            let(:extended_request){ "extended-request" }
+
+            it "returns status response" do
+              io.remote.in.write ([extended_payload.length].pack("N") + extended_payload)
+              payload_length = io.remote.out.read(4).unpack("N")[0]
+              payload = io.remote.out.read(payload_length)
+              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              expect( packet[:"request-id"] ).to eq request_id
+              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED
+              if version >= 3
+                expect( packet[:"error message"] ).to eq "Unsupported extended-request: #{extended_request}"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+        end
       end
     end
   end
