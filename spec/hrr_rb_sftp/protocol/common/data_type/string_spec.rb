@@ -1,5 +1,3 @@
-require "stringio"
-
 RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
   wljust = Proc.new{ |str, width, padding|
     str_width = str.each_char.to_a.map{|c| c.bytesize == 1 ? 1 : 2}.inject(0, &:+)

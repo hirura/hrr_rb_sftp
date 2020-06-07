@@ -1,5 +1,3 @@
-require "stringio"
-
 RSpec.describe HrrRbSftp::Protocol::Version1::DataType::Attrs do
   flag_and_field_list = [
     [described_class::SSH_FILEXFER_ATTR_SIZE,        [:"size"                         ]],

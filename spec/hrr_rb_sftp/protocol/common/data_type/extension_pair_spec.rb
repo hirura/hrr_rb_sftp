@@ -1,5 +1,3 @@
-require "stringio"
-
 RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPair do
   describe ".encode" do
     context "when arg is an Array of two Strings" do

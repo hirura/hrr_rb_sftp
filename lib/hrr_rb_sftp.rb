@@ -1,6 +1,7 @@
 module HrrRbSftp
 end
 
+require "fileutils"
 require "stringio"
 require "etc"
 

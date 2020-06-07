@@ -1,5 +1,3 @@
-require 'stringio'
-
 RSpec.describe HrrRbSftp::Protocol::Common::DataType::Byte do
   describe ".encode" do
     context "when arg is within byte value" do

@@ -1,5 +1,3 @@
-require "fileutils"
-
 RSpec.describe HrrRbSftp::Server do
   let(:io){
     io_in  = IO.pipe

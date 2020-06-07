@@ -1,5 +1,3 @@
-require "stringio"
-
 RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPairs do
   describe ".encode" do
     [

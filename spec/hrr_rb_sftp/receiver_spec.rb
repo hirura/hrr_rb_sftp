@@ -1,5 +1,3 @@
-require 'stringio'
-
 RSpec.describe HrrRbSftp::Receiver do
   let(:io_in){ StringIO.new String.new, 'r+' }
 

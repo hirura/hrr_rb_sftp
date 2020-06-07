@@ -1,5 +1,3 @@
-require 'stringio'
-
 RSpec.describe HrrRbSftp::Protocol::Common::DataType::Uint32 do
   describe ".encode" do
     context "when arg is within uint32 value" do
