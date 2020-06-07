@@ -1,32 +1,54 @@
-require 'stringio'
+require "stringio"
 
 RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
+  wljust = Proc.new{ |str, width, padding|
+    str_width = str.each_char.to_a.map{|c| c.bytesize == 1 ? 1 : 2}.inject(0, &:+)
+    str + padding * [0, width - str_width].max
+  }
+
+  wlslice = Proc.new{ |str, width|
+    tmp_pos = 0
+    tmp_width = 0
+    while tmp_pos < str.length
+      tmp_width += (str[tmp_pos,1].bytesize == 1 ? 1 : 2)
+      break if tmp_width > width
+      tmp_pos += 1
+    end
+    str[0, tmp_pos]
+  }
+
   describe ".encode" do
     context "when arg is string value" do
       context "with length less than or equal to 0xffff_ffff" do
+
         [
           "",
           "testing",
-          #'abcd' * (0x3fff_ffff) + 'xyz',
+          "abcdefghijklmnopqrstuvwxyz",
+          "ＭＵＬＴＩＢＹＴＥ",
+          #"abcd" * (0x3fff_ffff) + "xyz",
         ].each do |str|
-          str_length                = str.length
-          str_length_hex_str        = "%08x" % str_length
-          str_length_hex_str_pretty = str_length_hex_str.each_char.each_slice(2).map(&:join).join(' ')
-          str_pretty                = if str.length > 10 then str[0,10].each_char.to_a.join(' ') + ' ...' else str.each_char.to_a.join(' ') end
-          encoded_pretty            = if str_pretty.empty? then str_length_hex_str_pretty else [str_length_hex_str_pretty, str_pretty].join(' ') end
+          str_len_hex       = "%08x" % str.bytesize
+          str_len_hex_array = str_len_hex.each_char.each_slice(2).map(&:join)
+          str_hex           = str.unpack("H21")[0]
+          str_hex_array     = str_hex[0,20].each_char.each_slice(2).map(&:join) + if str_hex.length > 20 then ["..."] else [] end
+          encoded_array     = str_len_hex_array + str_hex_array
+          str_width         = str.each_char.to_a.map{|c| c.bytesize == 1 ? 1 : 2}.inject(0, &:+)
+          from_str          = wljust.call("\"#{if str_width > 15 then wljust.call(wlslice.call(str, 12) + "...", 12, " ") else str end}\"", 17, " ")
+          to_str            = "\"#{encoded_array.join(" ")}\""
 
-          it "encodes #{("\"%s\"" % (if str.length > 10 then str[0,10] + '...' else str end)).ljust(15, ' ')} to #{"\"%s\"" % encoded_pretty}" do
-            expect(HrrRbSftp::Protocol::Common::DataType::String.encode str).to eq ([str_length_hex_str].pack("H*") + str)
+          it "encodes #{from_str} to #{to_str}" do
+            expect(HrrRbSftp::Protocol::Common::DataType::String.encode str).to eq ([str_len_hex].pack("H*") + [str].pack("a*"))
           end
         end
       end
 
       context "with length greater than 0xffff_ffff" do
         it "encodes string with length longer than 0xffff_ffff (0xffff_ffff + 1) with error" do
-          str_mock = double('str mock with length (0xffff_ffff + 1)')
+          str_mock = double("str mock with length (0xffff_ffff + 1)")
 
           expect(str_mock).to receive(:kind_of?).with(::String).and_return(true).once
-          expect(str_mock).to receive(:length).with(no_args).and_return(0xffff_ffff + 1).twice
+          expect(str_mock).to receive(:bytesize).with(no_args).and_return(0xffff_ffff + 1).twice
 
           expect { HrrRbSftp::Protocol::Common::DataType::String.encode str_mock }.to raise_error ArgumentError
         end
@@ -42,7 +64,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
         {},
         Object,
       ].each do |value|
-        value_pretty = value.inspect.ljust(6, ' ')
+        value_pretty = value.inspect.ljust(6, " ")
 
         it "encodes #{value_pretty} with error" do
           expect { HrrRbSftp::Protocol::Common::DataType::String.encode value }.to raise_error ArgumentError
@@ -55,16 +77,21 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
     [
       "",
       "testing",
-      #'abcd' * (0x3fff_ffff) + 'xyz',
+      "abcdefghijklmnopqrstuvwxyz",
+      "ＭＵＬＴＩＢＹＴＥ",
+      #"abcd" * (0x3fff_ffff) + "xyz",
     ].each do |str|
-      str_length                = str.length
-      str_length_hex_str        = "%08x" % str_length
-      str_length_hex_str_pretty = str_length_hex_str.each_char.each_slice(2).map(&:join).join(' ')
-      str_pretty                = if str.length > 10 then str[0,10].each_char.to_a.join(' ') + ' ...' else str.each_char.to_a.join(' ') end
-      encoded_pretty            = if str_pretty.empty? then str_length_hex_str_pretty else [str_length_hex_str_pretty, str_pretty].join(' ') end
+      str_len_hex       = "%08x" % str.bytesize
+      str_len_hex_array = str_len_hex.each_char.each_slice(2).map(&:join)
+      str_hex           = str.unpack("H21")[0]
+      str_hex_array     = str_hex[0,20].each_char.each_slice(2).map(&:join) + if str_hex.length > 20 then ["..."] else [] end
+      encoded_array     = str_len_hex_array + str_hex_array
+      str_width         = str.each_char.to_a.map{|c| c.bytesize == 1 ? 1 : 2}.inject(0, &:+)
+      from_str          = "\"#{encoded_array.join(" ")}\"".ljust(47, " ")
+      to_str            = wljust.call("\"#{if str_width > 15 then wljust.call(wlslice.call(str, 12) + "...", 12, " ") else str end}\"", 17, " ")
 
-      it "decodes #{("\"%s\"" % encoded_pretty).ljust(37, ' ')} to #{"\"%s\"" % (if str.length > 10 then str[0,10] + '...' else str end)}" do
-        io = StringIO.new ([str_length_hex_str].pack("H*") + str), 'r'
+      it "decodes #{from_str} to #{to_str}" do
+        io = StringIO.new ([str_len_hex].pack("H*") + [str].pack("a*")), "r"
         expect(HrrRbSftp::Protocol::Common::DataType::String.decode io).to eq str
       end
     end
