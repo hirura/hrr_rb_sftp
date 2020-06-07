@@ -1,5 +1,3 @@
-require 'etc'
-
 module HrrRbSftp
   class Protocol
     class Version1
