@@ -1,6 +1,7 @@
 # HrrRbSftp
 
 [![Build Status](https://travis-ci.com/hirura/hrr_rb_sftp.svg?branch=master)](https://travis-ci.com/hirura/hrr_rb_sftp)
+[![Gem Version](https://badge.fury.io/rb/hrr_rb_sftp.svg)](https://badge.fury.io/rb/hrr_rb_sftp)
 
 hrr_rb_sftp is a pure Ruby SFTP server implementation. hrr_rb_sftp now supports SFTP protocol version 1, 2, and 3.
 
