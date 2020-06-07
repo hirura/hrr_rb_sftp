@@ -44,7 +44,19 @@ RSpec.describe HrrRbSftp::Receiver do
       end
     end
 
-    context "when io_in is closed just after receiving packet length" do
+    context "when io_in is closed during receiving packet length" do
+      before :example do
+        io_in.write payload_with_length[0,1]
+        io_in.close_write
+        io_in.rewind
+      end
+
+      it "returns nil" do
+        expect(receiver.receive).to be nil
+      end
+    end
+
+    context "when io_in is closed before receiving payload" do
       before :example do
         io_in.write payload_with_length[0,4]
         io_in.close_write
