@@ -11,7 +11,7 @@ module HrrRbSftp
         nil
       else
         payload = @io_in.read(paylaod_length)
-        if payload.nil? || payload.length != paylaod_length
+        if payload.nil? || payload.bytesize != paylaod_length
           nil
         else
           payload
