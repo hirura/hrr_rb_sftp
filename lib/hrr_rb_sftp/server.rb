@@ -6,7 +6,7 @@ module HrrRbSftp
       self.logger = logger
     end
 
-    def start io_in, io_out, io_err
+    def start io_in, io_out, io_err=nil
       log_info { "start server" }
 
       @io_in  = io_in

@@ -38,6 +38,13 @@ RSpec.describe HrrRbSftp::Server do
           expect{ server.start *io.local.to_a }.not_to raise_error
         end
 
+        it "takes in, out, and no err arguments and starts negotiating version then responds to requests" do
+          expect( server ).to receive(:negotiate_version).with(no_args).and_return(version).once
+          expect( server ).to receive(:respond_to_requests).with(no_args).once
+          expect( server ).to receive(:close_handles).with(no_args).once
+          expect{ server.start *(io.local.to_a[0,2]) }.not_to raise_error
+        end
+
         it "calls @protocol#close_handles even when #respond_to_requests raises an error" do
           expect( server ).to receive(:negotiate_version).with(no_args).and_return(version).once
           expect( server ).to receive(:respond_to_requests).with(no_args).and_raise(RuntimeError, "dummy error").once
@@ -47,8 +54,8 @@ RSpec.describe HrrRbSftp::Server do
       end
     end
 
-    it "raises an error when less than 3 arguments" do
-      expect{ server.start "arg1", "arg2" }.to raise_error ArgumentError
+    it "raises an error when less than 2 arguments" do
+      expect{ server.start "arg1" }.to raise_error ArgumentError
     end
 
     it "raises an error when more than 3 arguments" do
