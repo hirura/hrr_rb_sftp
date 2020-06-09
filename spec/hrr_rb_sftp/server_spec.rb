@@ -98,7 +98,7 @@ RSpec.describe HrrRbSftp::Server do
           let(:version){ version }
 
           it "receives init with version #{version} and returns version with version #{version}" do
-            io.remote.in.write ([init_payload.length].pack("N") + init_payload)
+            io.remote.in.write ([init_payload.bytesize].pack("N") + init_payload)
             payload_length = io.remote.out.read(4).unpack("N")[0]
             payload = io.remote.out.read(payload_length)
             expect( payload[0].unpack("C")[0] ).to eq HrrRbSftp::Protocol::Common::Packet::SSH_FXP_VERSION::TYPE
@@ -125,7 +125,7 @@ RSpec.describe HrrRbSftp::Server do
     let(:server){ described_class.new }
 
     before :example do
-      io.remote.in.write ([init_payload.length].pack("N") + init_payload)
+      io.remote.in.write ([init_payload.bytesize].pack("N") + init_payload)
     end
 
     [1, 2, 3].each do |version|
@@ -201,7 +201,7 @@ RSpec.describe HrrRbSftp::Server do
         server = described_class.new
         server.start *io.local.to_a
       }
-      io.remote.in.write ([init_payload.length].pack("N") + init_payload)
+      io.remote.in.write ([init_payload.bytesize].pack("N") + init_payload)
       payload_length = io.remote.out.read(4).unpack("N")[0]
       payload = io.remote.out.read(payload_length)
     end
@@ -226,7 +226,7 @@ RSpec.describe HrrRbSftp::Server do
           let(:request_id){ 1 }
 
           it "returns status response" do
-            io.remote.in.write ([realpath_payload.length].pack("N") + realpath_payload)
+            io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
             payload_length = io.remote.out.read(4).unpack("N")[0]
             payload = io.remote.out.read(payload_length)
             expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -248,7 +248,7 @@ RSpec.describe HrrRbSftp::Server do
           }
 
           it "returns status response" do
-            io.remote.in.write ([realpath_payload.length].pack("N") + realpath_payload)
+            io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
             payload_length = io.remote.out.read(4).unpack("N")[0]
             payload = io.remote.out.read(payload_length)
             expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -272,7 +272,7 @@ RSpec.describe HrrRbSftp::Server do
           let(:request_id){ 1 }
 
           it "returns status response" do
-            io.remote.in.write ([realpath_payload.length].pack("N") + realpath_payload)
+            io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
             payload_length = io.remote.out.read(4).unpack("N")[0]
             payload = io.remote.out.read(payload_length)
             expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -309,7 +309,7 @@ RSpec.describe HrrRbSftp::Server do
 
             it "returns handle response" do
               expect(::File).to receive(:open).with(filename, ::File::RDONLY).and_return(handle)
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
@@ -326,7 +326,7 @@ RSpec.describe HrrRbSftp::Server do
 
             it "returns handle response" do
               expect(::File).to receive(:open).with(filename, ::File::WRONLY, permissions).and_return(handle)
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
@@ -342,7 +342,7 @@ RSpec.describe HrrRbSftp::Server do
 
             it "returns handle response" do
               expect(::File).to receive(:open).with(filename, ::File::RDWR).and_return(handle)
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
@@ -358,7 +358,7 @@ RSpec.describe HrrRbSftp::Server do
 
             it "returns handle response" do
               expect(::File).to receive(:open).with(filename, ::File::WRONLY | ::File::APPEND).and_return(handle)
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
@@ -375,7 +375,7 @@ RSpec.describe HrrRbSftp::Server do
 
             it "returns handle response" do
               expect(::File).to receive(:open).with(filename, ::File::WRONLY | ::File::CREAT | ::File::TRUNC | ::File::EXCL, permissions).and_return(handle)
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
@@ -390,7 +390,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:attrs){ {} }
 
             it "returns status response" do
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -409,7 +409,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:attrs){ {} }
 
             it "returns status response" do
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -428,7 +428,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:attrs){ {} }
 
             it "returns status response" do
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -448,7 +448,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:attrs){ {} }
 
             it "returns status response" do
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -479,7 +479,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -499,7 +499,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:attrs){ {} }
 
             it "returns status response" do
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -548,7 +548,7 @@ RSpec.describe HrrRbSftp::Server do
 
             before :example do
               File.open(filename, "w"){ |f| f.write content }
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
@@ -560,7 +560,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              io.remote.in.write ([close_payload.bytesize].pack("N") + close_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -589,7 +589,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:handle){ "handle" }
 
             it "returns status response" do
-              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              io.remote.in.write ([close_payload.bytesize].pack("N") + close_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -680,7 +680,7 @@ RSpec.describe HrrRbSftp::Server do
 
             before :example do
               File.open(filename, "w"){ |f| f.write content }
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
@@ -688,14 +688,14 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             after :example do
-              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              io.remote.in.write ([close_payload.bytesize].pack("N") + close_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               FileUtils.remove_entry_secure filename
             end
 
             it "returns data and then EOF status response" do
-              io.remote.in.write ([read_payload_0.length].pack("N") + read_payload_0)
+              io.remote.in.write ([read_payload_0.bytesize].pack("N") + read_payload_0)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_DATA::TYPE
@@ -703,7 +703,7 @@ RSpec.describe HrrRbSftp::Server do
               expect( packet[:"request-id"] ).to eq read_request_id_0
               expect( packet[:"data"]       ).to eq content[0,5]
 
-              io.remote.in.write ([read_payload_1.length].pack("N") + read_payload_1)
+              io.remote.in.write ([read_payload_1.bytesize].pack("N") + read_payload_1)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_DATA::TYPE
@@ -711,7 +711,7 @@ RSpec.describe HrrRbSftp::Server do
               expect( packet[:"request-id"] ).to eq read_request_id_1
               expect( packet[:"data"]       ).to eq content[5,5]
 
-              io.remote.in.write ([read_payload_2.length].pack("N") + read_payload_2)
+              io.remote.in.write ([read_payload_2.bytesize].pack("N") + read_payload_2)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -742,7 +742,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:handle){ "handle" }
 
             it "returns status response" do
-              io.remote.in.write ([read_payload.length].pack("N") + read_payload)
+              io.remote.in.write ([read_payload.bytesize].pack("N") + read_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -818,7 +818,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:write_request_id_1){ 11 }
 
             before :example do
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
@@ -830,7 +830,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([write_payload_0.length].pack("N") + write_payload_0)
+              io.remote.in.write ([write_payload_0.bytesize].pack("N") + write_payload_0)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
@@ -841,7 +841,7 @@ RSpec.describe HrrRbSftp::Server do
                 expect( packet[:"language tag"]  ).to eq ""
               end
 
-              io.remote.in.write ([write_payload_1.length].pack("N") + write_payload_1)
+              io.remote.in.write ([write_payload_1.bytesize].pack("N") + write_payload_1)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
@@ -852,7 +852,7 @@ RSpec.describe HrrRbSftp::Server do
                 expect( packet[:"language tag"]  ).to eq ""
               end
 
-              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              io.remote.in.write ([close_payload.bytesize].pack("N") + close_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -885,7 +885,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:handle){ "handle" }
 
             it "returns status response" do
-              io.remote.in.write ([write_payload.length].pack("N") + write_payload)
+              io.remote.in.write ([write_payload.bytesize].pack("N") + write_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -928,7 +928,7 @@ RSpec.describe HrrRbSftp::Server do
             }
 
             it "returns attrs response" do
-              io.remote.in.write ([lstat_payload.length].pack("N") + lstat_payload)
+              io.remote.in.write ([lstat_payload.bytesize].pack("N") + lstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_ATTRS::TYPE
@@ -943,7 +943,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ "does/not/exist" }
 
             it "returns status response" do
-              io.remote.in.write ([lstat_payload.length].pack("N") + lstat_payload)
+              io.remote.in.write ([lstat_payload.bytesize].pack("N") + lstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -973,7 +973,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([lstat_payload.length].pack("N") + lstat_payload)
+              io.remote.in.write ([lstat_payload.bytesize].pack("N") + lstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -992,7 +992,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ ("a".."z").to_a.join * 10 }
 
             it "returns status response" do
-              io.remote.in.write ([lstat_payload.length].pack("N") + lstat_payload)
+              io.remote.in.write ([lstat_payload.bytesize].pack("N") + lstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1065,7 +1065,7 @@ RSpec.describe HrrRbSftp::Server do
 
             before :example do
               File.open(filename, "w"){ |f| f.write content }
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
@@ -1073,14 +1073,14 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             after :example do
-              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              io.remote.in.write ([close_payload.bytesize].pack("N") + close_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               FileUtils.remove_entry_secure filename
             end
 
             it "returns attrs response" do
-              io.remote.in.write ([fstat_payload.length].pack("N") + fstat_payload)
+              io.remote.in.write ([fstat_payload.bytesize].pack("N") + fstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_ATTRS::TYPE
@@ -1105,7 +1105,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:handle){ "handle" }
 
             it "returns status response" do
-              io.remote.in.write ([fstat_payload.length].pack("N") + fstat_payload)
+              io.remote.in.write ([fstat_payload.bytesize].pack("N") + fstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1161,7 +1161,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns attrs response" do
-              io.remote.in.write ([setstat_payload.length].pack("N") + setstat_payload)
+              io.remote.in.write ([setstat_payload.bytesize].pack("N") + setstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1190,7 +1190,7 @@ RSpec.describe HrrRbSftp::Server do
             }
 
             it "returns status response" do
-              io.remote.in.write ([setstat_payload.length].pack("N") + setstat_payload)
+              io.remote.in.write ([setstat_payload.bytesize].pack("N") + setstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1227,7 +1227,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([setstat_payload.length].pack("N") + setstat_payload)
+              io.remote.in.write ([setstat_payload.bytesize].pack("N") + setstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1253,7 +1253,7 @@ RSpec.describe HrrRbSftp::Server do
             }
 
             it "returns status response" do
-              io.remote.in.write ([setstat_payload.length].pack("N") + setstat_payload)
+              io.remote.in.write ([setstat_payload.bytesize].pack("N") + setstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1331,7 +1331,7 @@ RSpec.describe HrrRbSftp::Server do
 
             before :example do
               File.open(filename, "w"){ |f| f.write content }
-              io.remote.in.write ([open_payload.length].pack("N") + open_payload)
+              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
@@ -1339,14 +1339,14 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             after :example do
-              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              io.remote.in.write ([close_payload.bytesize].pack("N") + close_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               FileUtils.remove_entry_secure filename
             end
 
             it "returns status response" do
-              io.remote.in.write ([fsetstat_payload.length].pack("N") + fsetstat_payload)
+              io.remote.in.write ([fsetstat_payload.bytesize].pack("N") + fsetstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1386,7 +1386,7 @@ RSpec.describe HrrRbSftp::Server do
             }
 
             it "returns status response" do
-              io.remote.in.write ([fsetstat_payload.length].pack("N") + fsetstat_payload)
+              io.remote.in.write ([fsetstat_payload.bytesize].pack("N") + fsetstat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1420,7 +1420,7 @@ RSpec.describe HrrRbSftp::Server do
 
             it "returns handle response" do
               expect(::Dir).to receive(:open).with(path).and_return(handle)
-              io.remote.in.write ([opendir_payload.length].pack("N") + opendir_payload)
+              io.remote.in.write ([opendir_payload.bytesize].pack("N") + opendir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
@@ -1434,7 +1434,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ "does/not/exist" }
 
             it "returns status response" do
-              io.remote.in.write ([opendir_payload.length].pack("N") + opendir_payload)
+              io.remote.in.write ([opendir_payload.bytesize].pack("N") + opendir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1463,7 +1463,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([opendir_payload.length].pack("N") + opendir_payload)
+              io.remote.in.write ([opendir_payload.bytesize].pack("N") + opendir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1490,7 +1490,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([opendir_payload.length].pack("N") + opendir_payload)
+              io.remote.in.write ([opendir_payload.bytesize].pack("N") + opendir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1508,7 +1508,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ ("a".."z").to_a.join * 10 }
 
             it "returns status response" do
-              io.remote.in.write ([opendir_payload.length].pack("N") + opendir_payload)
+              io.remote.in.write ([opendir_payload.bytesize].pack("N") + opendir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1630,7 +1630,7 @@ RSpec.describe HrrRbSftp::Server do
               File.utime(0, 0, path)
               time = Time.new(Time.now.year, 1, 2, 3, 4, nil, Time.now.utc_offset)
               File.utime(time, time, File.join(path, file))
-              io.remote.in.write ([opendir_payload.length].pack("N") + opendir_payload)
+              io.remote.in.write ([opendir_payload.bytesize].pack("N") + opendir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
@@ -1638,14 +1638,14 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             after :example do
-              io.remote.in.write ([close_payload.length].pack("N") + close_payload)
+              io.remote.in.write ([close_payload.bytesize].pack("N") + close_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               FileUtils.remove_entry_secure path
             end
 
             it "returns name and then EOF status response" do
-              io.remote.in.write ([readdir_payload_0.length].pack("N") + readdir_payload_0)
+              io.remote.in.write ([readdir_payload_0.bytesize].pack("N") + readdir_payload_0)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_NAME::TYPE
@@ -1668,7 +1668,7 @@ RSpec.describe HrrRbSftp::Server do
               expect( list[symlink][:"longname"] ).to match /l.........   1 ........ ........ ........ ... .. ..... #{symlink}/
               expect( list[symlink][:"attrs"]    ).to eq symlink_attrs
 
-              io.remote.in.write ([readdir_payload_1.length].pack("N") + readdir_payload_1)
+              io.remote.in.write ([readdir_payload_1.bytesize].pack("N") + readdir_payload_1)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1697,7 +1697,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:handle){ "handle" }
 
             it "returns status response" do
-              io.remote.in.write ([readdir_payload.length].pack("N") + readdir_payload)
+              io.remote.in.write ([readdir_payload.bytesize].pack("N") + readdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1738,7 +1738,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([remove_payload.length].pack("N") + remove_payload)
+              io.remote.in.write ([remove_payload.bytesize].pack("N") + remove_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1758,7 +1758,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:filename){ "does/not/exist" }
 
             it "returns status response" do
-              io.remote.in.write ([remove_payload.length].pack("N") + remove_payload)
+              io.remote.in.write ([remove_payload.bytesize].pack("N") + remove_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1788,7 +1788,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([remove_payload.length].pack("N") + remove_payload)
+              io.remote.in.write ([remove_payload.bytesize].pack("N") + remove_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1807,7 +1807,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:filename){ ("a".."z").to_a.join * 10 }
 
             it "returns status response" do
-              io.remote.in.write ([remove_payload.length].pack("N") + remove_payload)
+              io.remote.in.write ([remove_payload.bytesize].pack("N") + remove_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1845,7 +1845,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([mkdir_payload.length].pack("N") + mkdir_payload)
+              io.remote.in.write ([mkdir_payload.bytesize].pack("N") + mkdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1873,7 +1873,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([mkdir_payload.length].pack("N") + mkdir_payload)
+              io.remote.in.write ([mkdir_payload.bytesize].pack("N") + mkdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1899,7 +1899,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([mkdir_payload.length].pack("N") + mkdir_payload)
+              io.remote.in.write ([mkdir_payload.bytesize].pack("N") + mkdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1917,7 +1917,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ ("a".."z").to_a.join * 10 }
 
             it "returns status response" do
-              io.remote.in.write ([mkdir_payload.length].pack("N") + mkdir_payload)
+              io.remote.in.write ([mkdir_payload.bytesize].pack("N") + mkdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1953,7 +1953,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([rmdir_payload.length].pack("N") + rmdir_payload)
+              io.remote.in.write ([rmdir_payload.bytesize].pack("N") + rmdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -1972,7 +1972,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ "does/not/exist" }
 
             it "returns status response" do
-              io.remote.in.write ([rmdir_payload.length].pack("N") + rmdir_payload)
+              io.remote.in.write ([rmdir_payload.bytesize].pack("N") + rmdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2001,7 +2001,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([rmdir_payload.length].pack("N") + rmdir_payload)
+              io.remote.in.write ([rmdir_payload.bytesize].pack("N") + rmdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2027,7 +2027,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([rmdir_payload.length].pack("N") + rmdir_payload)
+              io.remote.in.write ([rmdir_payload.bytesize].pack("N") + rmdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2054,7 +2054,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([rmdir_payload.length].pack("N") + rmdir_payload)
+              io.remote.in.write ([rmdir_payload.bytesize].pack("N") + rmdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2072,7 +2072,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ ("a".."z").to_a.join * 10 }
 
             it "returns status response" do
-              io.remote.in.write ([rmdir_payload.length].pack("N") + rmdir_payload)
+              io.remote.in.write ([rmdir_payload.bytesize].pack("N") + rmdir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2104,7 +2104,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ "." }
 
             it "returns name response" do
-              io.remote.in.write ([realpath_payload.length].pack("N") + realpath_payload)
+              io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_NAME::TYPE
@@ -2146,7 +2146,7 @@ RSpec.describe HrrRbSftp::Server do
             }
 
             it "returns attrs response" do
-              io.remote.in.write ([stat_payload.length].pack("N") + stat_payload)
+              io.remote.in.write ([stat_payload.bytesize].pack("N") + stat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_ATTRS::TYPE
@@ -2161,7 +2161,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ "does/not/exist" }
 
             it "returns status response" do
-              io.remote.in.write ([stat_payload.length].pack("N") + stat_payload)
+              io.remote.in.write ([stat_payload.bytesize].pack("N") + stat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2191,7 +2191,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([stat_payload.length].pack("N") + stat_payload)
+              io.remote.in.write ([stat_payload.bytesize].pack("N") + stat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2210,7 +2210,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ ("a".."z").to_a.join * 10 }
 
             it "returns status response" do
-              io.remote.in.write ([stat_payload.length].pack("N") + stat_payload)
+              io.remote.in.write ([stat_payload.bytesize].pack("N") + stat_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2256,7 +2256,7 @@ RSpec.describe HrrRbSftp::Server do
             it "returns status response" do
               expect( File.exist?(oldpath) ).to be true
               expect( File.exist?(newpath) ).to be false
-              io.remote.in.write ([rename_payload.length].pack("N") + rename_payload)
+              io.remote.in.write ([rename_payload.bytesize].pack("N") + rename_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2278,7 +2278,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:newpath){ "dummy" }
 
             it "returns status response" do
-              io.remote.in.write ([rename_payload.length].pack("N") + rename_payload)
+              io.remote.in.write ([rename_payload.bytesize].pack("N") + rename_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2309,7 +2309,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([rename_payload.length].pack("N") + rename_payload)
+              io.remote.in.write ([rename_payload.bytesize].pack("N") + rename_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2337,7 +2337,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([rename_payload.length].pack("N") + rename_payload)
+              io.remote.in.write ([rename_payload.bytesize].pack("N") + rename_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2382,7 +2382,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns name response" do
-              io.remote.in.write ([readlink_payload.length].pack("N") + readlink_payload)
+              io.remote.in.write ([readlink_payload.bytesize].pack("N") + readlink_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_NAME::TYPE
@@ -2400,7 +2400,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ "does/not/exist" }
 
             it "returns status response" do
-              io.remote.in.write ([readlink_payload.length].pack("N") + readlink_payload)
+              io.remote.in.write ([readlink_payload.bytesize].pack("N") + readlink_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2430,7 +2430,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([readlink_payload.length].pack("N") + readlink_payload)
+              io.remote.in.write ([readlink_payload.bytesize].pack("N") + readlink_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2449,7 +2449,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:path){ ("a".."z").to_a.join * 10 }
 
             it "returns status response" do
-              io.remote.in.write ([readlink_payload.length].pack("N") + readlink_payload)
+              io.remote.in.write ([readlink_payload.bytesize].pack("N") + readlink_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2487,7 +2487,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns name response" do
-              io.remote.in.write ([symlink_payload.length].pack("N") + symlink_payload)
+              io.remote.in.write ([symlink_payload.bytesize].pack("N") + symlink_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2518,7 +2518,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([symlink_payload.length].pack("N") + symlink_payload)
+              io.remote.in.write ([symlink_payload.bytesize].pack("N") + symlink_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2546,7 +2546,7 @@ RSpec.describe HrrRbSftp::Server do
             end
 
             it "returns status response" do
-              io.remote.in.write ([symlink_payload.length].pack("N") + symlink_payload)
+              io.remote.in.write ([symlink_payload.bytesize].pack("N") + symlink_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2566,7 +2566,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:targetpath){ "targetpath" }
 
             it "returns status response" do
-              io.remote.in.write ([symlink_payload.length].pack("N") + symlink_payload)
+              io.remote.in.write ([symlink_payload.bytesize].pack("N") + symlink_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
@@ -2598,7 +2598,7 @@ RSpec.describe HrrRbSftp::Server do
             let(:extended_request){ "extended-request" }
 
             it "returns status response" do
-              io.remote.in.write ([extended_payload.length].pack("N") + extended_payload)
+              io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
