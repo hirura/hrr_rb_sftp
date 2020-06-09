@@ -14,7 +14,7 @@ RSpec.describe HrrRbSftp::Receiver do
   describe "#receive" do
     let(:receiver){ described_class.new io_in }
     let(:payload){ "testing" }
-    let(:payload_with_length){ [payload.length.to_s.rjust(8, "0"), payload].pack("H8" "a#{payload.length}") }
+    let(:payload_with_length){ [payload.bytesize.to_s.rjust(8, "0"), payload].pack("H8" "a#{payload.bytesize}") }
 
     context "when receiving correct payload" do
       before :example do
