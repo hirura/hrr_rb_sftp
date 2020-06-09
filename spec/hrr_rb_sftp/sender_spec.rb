@@ -14,13 +14,13 @@ RSpec.describe HrrRbSftp::Sender do
     it "sends payload length first" do
       sender.send payload
       io_out.pos = 0
-      expect(io_out.read(4)).to eq [payload.length.to_s.rjust(8, "0")].pack("H8")
+      expect(io_out.read(4)).to eq [payload.bytesize.to_s.rjust(8, "0")].pack("H8")
     end
 
     it "then sends payload" do
       sender.send payload
       io_out.pos = 4
-      expect(io_out.read(payload.length)).to eq payload
+      expect(io_out.read(payload.bytesize)).to eq payload
     end
 
     it "does not send any extra payloads" do
