@@ -8,13 +8,13 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPairs do
       context "when arg Array size is #{arg.size}" do
         encoded = arg.map{ |pair|
           [pair[:"extension-name"], pair[:"extension-data"]].map{ |e|
-            [e.length.to_s.rjust(8, "0")].pack("H8") + e
+            [e.bytesize.to_s.rjust(8, "0")].pack("H8") + e
           }
         }.join
         encoded_pretty = arg.map{ |pair|
           [pair[:"extension-name"], pair[:"extension-data"]].map{ |e|
             [
-              e.length.to_s.rjust(8, "0").each_char.each_slice(2).map(&:join).join(" "),
+              e.bytesize.to_s.rjust(8, "0").each_char.each_slice(2).map(&:join).join(" "),
               e.each_char.to_a.join(" ")
             ].join(" ")
           }.join(" ")
@@ -51,13 +51,13 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPairs do
       context "when the number of pairs is #{arg.size}" do
         encoded = arg.map{ |pair|
           [pair[:"extension-name"], pair[:"extension-data"]].map{ |e|
-            [e.length.to_s.rjust(8, "0")].pack("H8") + e
+            [e.bytesize.to_s.rjust(8, "0")].pack("H8") + e
           }
         }.join
         encoded_pretty = arg.map{ |pair|
           [pair[:"extension-name"], pair[:"extension-data"]].map{ |e|
             [
-              e.length.to_s.rjust(8, "0").each_char.each_slice(2).map(&:join).join(" "),
+              e.bytesize.to_s.rjust(8, "0").each_char.each_slice(2).map(&:join).join(" "),
               e.each_char.to_a.join(" ")
             ].join(" ")
           }.join(" ")

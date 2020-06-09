@@ -3,11 +3,11 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPair do
     context "when arg is an Array of two Strings" do
       arg = {:"extension-name" => "name", :"extension-data" => "data"}
       encoded = [arg[:"extension-name"], arg[:"extension-data"]].map{ |e|
-        [e.length.to_s.rjust(8, "0")].pack("H8") + e
+        [e.bytesize.to_s.rjust(8, "0")].pack("H8") + e
       }.join
       encoded_pretty = [arg[:"extension-name"], arg[:"extension-data"]].map{ |e|
         [
-          e.length.to_s.rjust(8, "0").each_char.each_slice(2).map(&:join).join(" "),
+          e.bytesize.to_s.rjust(8, "0").each_char.each_slice(2).map(&:join).join(" "),
           e.each_char.to_a.join(" ")
         ].join(" ")
       }.join(" ")
@@ -36,11 +36,11 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPair do
   describe ".decode" do
     arg = {:"extension-name" => "name", :"extension-data" => "data"}
     encoded = [arg[:"extension-name"], arg[:"extension-data"]].map{ |e|
-      [e.length.to_s.rjust(8, "0")].pack("H8") + e
+      [e.bytesize.to_s.rjust(8, "0")].pack("H8") + e
     }.join
     encoded_pretty = [arg[:"extension-name"], arg[:"extension-data"]].map{ |e|
       [
-        e.length.to_s.rjust(8, "0").each_char.each_slice(2).map(&:join).join(" "),
+        e.bytesize.to_s.rjust(8, "0").each_char.each_slice(2).map(&:join).join(" "),
         e.each_char.to_a.join(" ")
       ].join(" ")
     }.join(" ")
