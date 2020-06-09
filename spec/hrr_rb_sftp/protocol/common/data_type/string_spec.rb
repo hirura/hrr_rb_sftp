@@ -29,7 +29,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
           str_len_hex       = "%08x" % str.bytesize
           str_len_hex_array = str_len_hex.each_char.each_slice(2).map(&:join)
           str_hex           = str.unpack("H21")[0]
-          str_hex_array     = str_hex[0,20].each_char.each_slice(2).map(&:join) + if str_hex.length > 20 then ["..."] else [] end
+          str_hex_array     = str_hex[0,20].each_char.each_slice(2).map(&:join) + if str_hex.bytesize > 20 then ["..."] else [] end
           encoded_array     = str_len_hex_array + str_hex_array
           str_width         = str.each_char.to_a.map{|c| c.bytesize == 1 ? 1 : 2}.inject(0, &:+)
           from_str          = wljust.call("\"#{if str_width > 15 then wljust.call(wlslice.call(str, 12) + "...", 12, " ") else str end}\"", 17, " ")
@@ -82,7 +82,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
       str_len_hex       = "%08x" % str.bytesize
       str_len_hex_array = str_len_hex.each_char.each_slice(2).map(&:join)
       str_hex           = str.unpack("H21")[0]
-      str_hex_array     = str_hex[0,20].each_char.each_slice(2).map(&:join) + if str_hex.length > 20 then ["..."] else [] end
+      str_hex_array     = str_hex[0,20].each_char.each_slice(2).map(&:join) + if str_hex.bytesize > 20 then ["..."] else [] end
       encoded_array     = str_len_hex_array + str_hex_array
       str_width         = str.each_char.to_a.map{|c| c.bytesize == 1 ? 1 : 2}.inject(0, &:+)
       from_str          = "\"#{encoded_array.join(" ")}\"".ljust(47, " ")
