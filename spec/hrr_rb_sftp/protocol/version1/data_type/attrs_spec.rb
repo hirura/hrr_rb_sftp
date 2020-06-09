@@ -93,7 +93,7 @@ RSpec.describe HrrRbSftp::Protocol::Version1::DataType::Attrs do
               encoded_extended_count = [es.size.to_s(16).rjust(8, "0")].pack("H*")
               encoded_extensions = es.map{ |e|
                 [e[:"extension-name"], e[:"extension-data"]].map{ |s|
-                  [s.length.to_s.rjust(8, "0")].pack("H8") + s
+                  [s.bytesize.to_s.rjust(8, "0")].pack("H8") + s
                 }.join
               }.join
 
@@ -153,7 +153,7 @@ RSpec.describe HrrRbSftp::Protocol::Version1::DataType::Attrs do
               encoded_extended_count = [es.size.to_s(16).rjust(8, "0")].pack("H*")
               encoded_extensions = es.map{ |e|
                 [e[:"extension-name"], e[:"extension-data"]].map{ |s|
-                  [s.length.to_s.rjust(8, "0")].pack("H8") + s
+                  [s.bytesize.to_s.rjust(8, "0")].pack("H8") + s
                 }.join
               }.join
 
