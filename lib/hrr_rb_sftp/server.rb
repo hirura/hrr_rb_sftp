@@ -1,11 +1,36 @@
 module HrrRbSftp
+
+  #
+  # This class implements SFTP server.
+  #
+  # @example
+  #   # instantiate a server
+  #   server = HrrRbSftp::Server.new(logger: logger)
+  #
+  #   # then start the server with IO arguments
+  #   server.start(io_in, io_out, io_err)
+  #
   class Server
     include Loggable
 
+    #
+    # @param logger [Logger] logger.
+    #
     def initialize logger: nil
       self.logger = logger
     end
 
+    #
+    # Starts SFTP server.
+    #
+    # @example
+    #   # start a server with IO arguments
+    #   server.start(io_in, io_out, io_err)
+    #
+    # @param io_in  [IO] An IO for input.
+    # @param io_out [IO] An IO for output.
+    # @param io_err [IO] An IO for debug output.
+    #
     def start io_in, io_out, io_err=nil
       log_info { "start server" }
 
