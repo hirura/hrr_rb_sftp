@@ -1,6 +1,10 @@
 module HrrRbSftp
   class Protocol
     class Version1
+
+      #
+      # This module implements SFTP protocol version 1 data types to be used to encode or decode packet.
+      #
       module DataType
         include Common::DataType
       end
