@@ -1,15 +1,31 @@
 module HrrRbSftp
   class Protocol
     module Common
+
+      #
+      # This module implements common packet operations and is to be included in each packet class.
+      #
       module Packetable
         include Loggable
 
+        #
+        # Returns a new instance of a class that includes this module.
+        #
+        # @param handles [Hash{String=>File}, Hash{String=>Dir}] A list of opened handles.
+        # @param logger [Logger] Logger.
+        #
         def initialize handles, logger: nil
           self.logger = logger
 
           @handles = handles
         end
 
+        #
+        # Encodes packet represented in Hash into payload represented in binary string.
+        #
+        # @param packet [Hash{Symbol=>Object}] Packet represented in Hash that key and value are field name and field value.
+        # @return [String] Encoded payload converted from packet.
+        #
         def encode packet
           log_debug { 'encoding packet: ' + packet.inspect }
           format = common_format + conditional_format(packet)
@@ -24,6 +40,12 @@ module HrrRbSftp
           }.join
         end
 
+        #
+        # Decodes payload represented in binary string into packet represented in Hash.
+        #
+        # @param payload [String] Payload of binary string.
+        # @return [String] Decoded packet represented in Hash that key and value are field name and field value.
+        #
         def decode payload
           payload_io = StringIO.new payload
           format = common_format
