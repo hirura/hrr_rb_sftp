@@ -1,6 +1,10 @@
 module HrrRbSftp
   class Protocol
     module Common
+
+      #
+      # This module implements SFTP protocol version common data types to be used to encode or decode packet.
+      #
       module DataType
       end
     end
