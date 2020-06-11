@@ -1,6 +1,10 @@
 module HrrRbSftp
   class Protocol
     class Version1
+
+      #
+      # This module implements SFTP protocol version 1 packet types, formats, and responders.
+      #
       module Packet
       end
     end
