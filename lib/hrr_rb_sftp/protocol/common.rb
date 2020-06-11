@@ -1,5 +1,9 @@
 module HrrRbSftp
   class Protocol
+
+    #
+    # This module implements SFTP protocol version independent common functions.
+    #
     module Common
     end
   end
