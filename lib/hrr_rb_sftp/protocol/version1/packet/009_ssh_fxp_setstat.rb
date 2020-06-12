@@ -34,10 +34,10 @@ module HrrRbSftp
             begin
               path = request[:"path"]
               attrs = request[:"attrs"]
+              File.truncate(path, attrs[:"size"])                 if attrs.has_key?(:"size")
               FileUtils.chmod(attrs[:"permissions"], path)        if attrs.has_key?(:"permissions")
               File.utime(attrs[:"atime"], attrs[:"mtime"], path)  if attrs.has_key?(:"atime") && attrs.has_key?(:"mtime")
               FileUtils.chown(attrs[:"uid"], attrs[:"gid"], path) if attrs.has_key?(:"uid") && attrs.has_key?(:"gid")
-              File.truncate(path, attrs[:"size"])                 if attrs.has_key?(:"size")
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -53,7 +53,7 @@ module HrrRbSftp
                 :"error message" => "No such file or directory",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES, Errno::EPERM
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

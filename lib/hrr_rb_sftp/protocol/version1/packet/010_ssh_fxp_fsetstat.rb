@@ -35,15 +35,23 @@ module HrrRbSftp
               raise "Specified handle does not exist" unless @handles.has_key?(request[:"handle"])
               file = @handles[request[:"handle"]]
               attrs = request[:"attrs"]
+              file.truncate(attrs[:"size"])                           if attrs.has_key?(:"size")
               file.chmod(attrs[:"permissions"])                       if attrs.has_key?(:"permissions")
               File.utime(attrs[:"atime"], attrs[:"mtime"], file.path) if attrs.has_key?(:"atime") && attrs.has_key?(:"mtime")
               file.chown(attrs[:"uid"], attrs[:"gid"])                if attrs.has_key?(:"uid") && attrs.has_key?(:"gid")
-              file.truncate(attrs[:"size"])                           if attrs.has_key?(:"size")
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
                 :"code"          => SSH_FXP_STATUS::SSH_FX_OK,
                 :"error message" => "Success",
+                :"language tag"  => "",
+              }
+            rescue Errno::EPERM
+              {
+                :"type"          => SSH_FXP_STATUS::TYPE,
+                :"request-id"    => request[:"request-id"],
+                :"code"          => SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED,
+                :"error message" => "Permission denied",
                 :"language tag"  => "",
               }
             rescue => e

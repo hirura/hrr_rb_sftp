@@ -1243,21 +1243,6 @@ RSpec.describe HrrRbSftp::Server do
           context "when request is valid" do
             let(:request_id){ 1 }
             let(:path){ "target" }
-            let(:oldattrs){
-              stat = File.stat(path)
-              attrs = Hash.new
-              attrs[:"permissions"] = stat.mode       if stat.mode
-              attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
-              attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
-              attrs
-            }
-            let(:newattrs){
-              attrs = Hash.new
-              attrs[:"permissions"] = 0100000 if oldattrs.has_key?(:"permissions")
-              attrs[:"atime"]       =       0 if oldattrs.has_key?(:"atime")
-              attrs[:"mtime"]       =       0 if oldattrs.has_key?(:"mtime")
-              attrs
-            }
 
             before :example do
               FileUtils.touch(path)
@@ -1267,21 +1252,86 @@ RSpec.describe HrrRbSftp::Server do
               FileUtils.remove_entry_secure(path)
             end
 
-            it "returns attrs response" do
-              io.remote.in.write ([setstat_payload.bytesize].pack("N") + setstat_payload)
-              payload_length = io.remote.out.read(4).unpack("N")[0]
-              payload = io.remote.out.read(payload_length)
-              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
-              expect( packet[:"request-id"] ).to eq request_id
-              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
-              if version >= 3
-                expect( packet[:"error message"] ).to eq "Success"
-                expect( packet[:"language tag"]  ).to eq ""
+            context "when attrs does not have uid and gid" do
+              let(:oldattrs){
+                stat = File.stat(path)
+                attrs = Hash.new
+                attrs[:"size"]        = stat.size       if stat.size
+                attrs[:"permissions"] = stat.mode       if stat.mode
+                attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+                attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+                attrs
+              }
+              let(:newattrs){
+                attrs = Hash.new
+                attrs[:"size"]        =     100 if oldattrs.has_key?(:"size")
+                attrs[:"permissions"] = 0100000 if oldattrs.has_key?(:"permissions")
+                attrs[:"atime"]       =       0 if oldattrs.has_key?(:"atime")
+                attrs[:"mtime"]       =       0 if oldattrs.has_key?(:"mtime")
+                attrs
+              }
+
+              it "returns status response" do
+                io.remote.in.write ([setstat_payload.bytesize].pack("N") + setstat_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                expect( packet[:"request-id"] ).to eq request_id
+                expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
+                if version >= 3
+                  expect( packet[:"error message"] ).to eq "Success"
+                  expect( packet[:"language tag"]  ).to eq ""
+                end
+                expect( File.stat(path).size       ).to eq newattrs[:"size"]        if newattrs.has_key?(:"size")
+                expect( File.stat(path).mode       ).to eq newattrs[:"permissions"] if newattrs.has_key?(:"permissions")
+                expect( File.stat(path).atime.to_i ).to eq newattrs[:"atime"]       if newattrs.has_key?(:"atime")
+                expect( File.stat(path).mtime.to_i ).to eq newattrs[:"mtime"]       if newattrs.has_key?(:"mtime")
               end
-              expect( File.stat(path).mode       ).to eq newattrs[:"permissions"]
-              expect( File.stat(path).atime.to_i ).to eq newattrs[:"atime"]
-              expect( File.stat(path).mtime.to_i ).to eq newattrs[:"mtime"]
+            end
+
+            context "when attrs has uid and gid" do
+              let(:oldattrs){
+                stat = File.stat(path)
+                attrs = Hash.new
+                attrs[:"size"]        = stat.size       if stat.size
+                attrs[:"uid"]         = stat.uid        if stat.uid
+                attrs[:"gid"]         = stat.gid        if stat.gid
+                attrs[:"permissions"] = stat.mode       if stat.mode
+                attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+                attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+                attrs
+              }
+              let(:newattrs){
+                attrs = Hash.new
+                attrs[:"size"]        =     100 if oldattrs.has_key?(:"size")
+                attrs[:"uid"]         =       0 if oldattrs.has_key?(:"uid")
+                attrs[:"gid"]         =       0 if oldattrs.has_key?(:"gid")
+                attrs[:"permissions"] = 0100000 if oldattrs.has_key?(:"permissions")
+                attrs[:"atime"]       =       0 if oldattrs.has_key?(:"atime")
+                attrs[:"mtime"]       =       0 if oldattrs.has_key?(:"mtime")
+                attrs
+              }
+
+              it "returns status response" do
+                io.remote.in.write ([setstat_payload.bytesize].pack("N") + setstat_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                expect( packet[:"request-id"] ).to eq request_id
+                expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
+                if version >= 3
+                  expect( packet[:"error message"] ).to eq "Permission denied"
+                  expect( packet[:"language tag"]  ).to eq ""
+                end
+                expect( File.stat(path).size       ).to eq newattrs[:"size"]        if newattrs.has_key?(:"size")
+                expect( File.stat(path).mode       ).to eq newattrs[:"permissions"] if newattrs.has_key?(:"permissions")
+                expect( File.stat(path).atime.to_i ).to eq newattrs[:"atime"]       if newattrs.has_key?(:"atime")
+                expect( File.stat(path).mtime.to_i ).to eq newattrs[:"mtime"]       if newattrs.has_key?(:"mtime")
+                expect( File.stat(path).uid        ).to eq oldattrs[:"uid"]         if oldattrs.has_key?(:"uid")
+                expect( File.stat(path).gid        ).to eq oldattrs[:"gid"]         if oldattrs.has_key?(:"gid")
+              end
             end
           end
 
@@ -1391,7 +1441,6 @@ RSpec.describe HrrRbSftp::Server do
             }
             let(:open_request_id){ 1 }
             let(:filename){ "filename" }
-            let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_READ }
             let(:open_attrs){ {} }
             let(:content){ "0123456789" }
 
@@ -1420,22 +1469,6 @@ RSpec.describe HrrRbSftp::Server do
             }
             let(:fsetstat_request_id){ 10 }
 
-            let(:oldattrs){
-              stat = File.stat(filename)
-              attrs = Hash.new
-              attrs[:"permissions"] = stat.mode       if stat.mode
-              attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
-              attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
-              attrs
-            }
-            let(:newattrs){
-              attrs = Hash.new
-              attrs[:"permissions"] = 0100000 if oldattrs.has_key?(:"permissions")
-              attrs[:"atime"]       =       0 if oldattrs.has_key?(:"atime")
-              attrs[:"mtime"]       =       0 if oldattrs.has_key?(:"mtime")
-              attrs
-            }
-
             before :example do
               File.open(filename, "w"){ |f| f.write content }
               io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
@@ -1452,21 +1485,200 @@ RSpec.describe HrrRbSftp::Server do
               FileUtils.remove_entry_secure filename
             end
 
-            it "returns status response" do
-              io.remote.in.write ([fsetstat_payload.bytesize].pack("N") + fsetstat_payload)
-              payload_length = io.remote.out.read(4).unpack("N")[0]
-              payload = io.remote.out.read(payload_length)
-              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
-              expect( packet[:"request-id"]  ).to eq fsetstat_request_id
-              expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
-              if version >= 3
-                expect( packet[:"error message"] ).to eq "Success"
-                expect( packet[:"language tag"]  ).to eq ""
+            context "when attrs does not have size, uid and gid" do
+              let(:oldattrs){
+                stat = File.stat(filename)
+                attrs = Hash.new
+                attrs[:"permissions"] = stat.mode       if stat.mode
+                attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+                attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+                attrs
+              }
+              let(:newattrs){
+                attrs = Hash.new
+                attrs[:"permissions"] = 0100000 if oldattrs.has_key?(:"permissions")
+                attrs[:"atime"]       =       0 if oldattrs.has_key?(:"atime")
+                attrs[:"mtime"]       =       0 if oldattrs.has_key?(:"mtime")
+                attrs
+              }
+
+              context "when file is opened for write" do
+                let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_WRITE }
+
+                it "returns status response" do
+                  io.remote.in.write ([fsetstat_payload.bytesize].pack("N") + fsetstat_payload)
+                  payload_length = io.remote.out.read(4).unpack("N")[0]
+                  payload = io.remote.out.read(payload_length)
+                  expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  expect( packet[:"request-id"]  ).to eq fsetstat_request_id
+                  expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
+                  if version >= 3
+                    expect( packet[:"error message"] ).to eq "Success"
+                    expect( packet[:"language tag"]  ).to eq ""
+                  end
+                  expect( File.stat(filename).mode       ).to eq newattrs[:"permissions"] if newattrs.has_key?(:"permissions")
+                  expect( File.stat(filename).atime.to_i ).to eq newattrs[:"atime"]       if newattrs.has_key?(:"atime")
+                  expect( File.stat(filename).mtime.to_i ).to eq newattrs[:"mtime"]       if newattrs.has_key?(:"mtime")
+                end
               end
-              expect( File.stat(filename).mode       ).to eq newattrs[:"permissions"]
-              expect( File.stat(filename).atime.to_i ).to eq newattrs[:"atime"]
-              expect( File.stat(filename).mtime.to_i ).to eq newattrs[:"mtime"]
+
+              context "when file is opened for read" do
+                let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_READ }
+
+                it "returns status response" do
+                  io.remote.in.write ([fsetstat_payload.bytesize].pack("N") + fsetstat_payload)
+                  payload_length = io.remote.out.read(4).unpack("N")[0]
+                  payload = io.remote.out.read(payload_length)
+                  expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  expect( packet[:"request-id"]  ).to eq fsetstat_request_id
+                  expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
+                  if version >= 3
+                    expect( packet[:"error message"] ).to eq "Success"
+                    expect( packet[:"language tag"]  ).to eq ""
+                  end
+                  expect( File.stat(filename).mode       ).to eq newattrs[:"permissions"] if newattrs.has_key?(:"permissions")
+                  expect( File.stat(filename).atime.to_i ).to eq newattrs[:"atime"]       if newattrs.has_key?(:"atime")
+                  expect( File.stat(filename).mtime.to_i ).to eq newattrs[:"mtime"]       if newattrs.has_key?(:"mtime")
+                end
+              end
+            end
+
+            context "when attrs has size and does not have uid and gid" do
+              let(:oldattrs){
+                stat = File.stat(filename)
+                attrs = Hash.new
+                attrs[:"size"]        = stat.size       if stat.size
+                attrs[:"permissions"] = stat.mode       if stat.mode
+                attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+                attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+                attrs
+              }
+              let(:newattrs){
+                attrs = Hash.new
+                attrs[:"size"]        =     100 if oldattrs.has_key?(:"size")
+                attrs[:"permissions"] = 0100000 if oldattrs.has_key?(:"permissions")
+                attrs[:"atime"]       =       0 if oldattrs.has_key?(:"atime")
+                attrs[:"mtime"]       =       0 if oldattrs.has_key?(:"mtime")
+                attrs
+              }
+
+              context "when file is opened for write" do
+                let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_WRITE }
+
+                it "returns status response" do
+                  io.remote.in.write ([fsetstat_payload.bytesize].pack("N") + fsetstat_payload)
+                  payload_length = io.remote.out.read(4).unpack("N")[0]
+                  payload = io.remote.out.read(payload_length)
+                  expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  expect( packet[:"request-id"]  ).to eq fsetstat_request_id
+                  expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
+                  if version >= 3
+                    expect( packet[:"error message"] ).to eq "Success"
+                    expect( packet[:"language tag"]  ).to eq ""
+                  end
+                  expect( File.stat(filename).size       ).to eq newattrs[:"size"]        if newattrs.has_key?(:"size")
+                  expect( File.stat(filename).mode       ).to eq newattrs[:"permissions"] if newattrs.has_key?(:"permissions")
+                  expect( File.stat(filename).atime.to_i ).to eq newattrs[:"atime"]       if newattrs.has_key?(:"atime")
+                  expect( File.stat(filename).mtime.to_i ).to eq newattrs[:"mtime"]       if newattrs.has_key?(:"mtime")
+                end
+              end
+
+              context "when file is opened for read" do
+                let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_READ }
+
+                it "returns status response" do
+                  io.remote.in.write ([fsetstat_payload.bytesize].pack("N") + fsetstat_payload)
+                  payload_length = io.remote.out.read(4).unpack("N")[0]
+                  payload = io.remote.out.read(payload_length)
+                  expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  expect( packet[:"request-id"]  ).to eq fsetstat_request_id
+                  expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+                  if version >= 3
+                    expect( packet[:"error message"] ).to eq "not opened for writing"
+                    expect( packet[:"language tag"]  ).to eq ""
+                  end
+                  expect( File.stat(filename).size       ).to eq oldattrs[:"size"]        if oldattrs.has_key?(:"size")
+                  expect( File.stat(filename).mode       ).to eq oldattrs[:"permissions"] if oldattrs.has_key?(:"permissions")
+                  expect( File.stat(filename).atime.to_i ).to eq oldattrs[:"atime"]       if oldattrs.has_key?(:"atime")
+                  expect( File.stat(filename).mtime.to_i ).to eq oldattrs[:"mtime"]       if oldattrs.has_key?(:"mtime")
+                end
+              end
+            end
+
+            context "when attrs has size, uid and gid" do
+              let(:oldattrs){
+                stat = File.stat(filename)
+                attrs = Hash.new
+                attrs[:"size"]        = stat.size       if stat.size
+                attrs[:"uid"]         = stat.uid        if stat.uid
+                attrs[:"gid"]         = stat.gid        if stat.gid
+                attrs[:"permissions"] = stat.mode       if stat.mode
+                attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+                attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+                attrs
+              }
+              let(:newattrs){
+                attrs = Hash.new
+                attrs[:"size"]        =     100 if oldattrs.has_key?(:"size")
+                attrs[:"uid"]         =       0 if oldattrs.has_key?(:"uid")
+                attrs[:"gid"]         =       0 if oldattrs.has_key?(:"gid")
+                attrs[:"permissions"] = 0100000 if oldattrs.has_key?(:"permissions")
+                attrs[:"atime"]       =       0 if oldattrs.has_key?(:"atime")
+                attrs[:"mtime"]       =       0 if oldattrs.has_key?(:"mtime")
+                attrs
+              }
+
+              context "when file is opened for write" do
+                let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_WRITE }
+
+                it "returns status response" do
+                  io.remote.in.write ([fsetstat_payload.bytesize].pack("N") + fsetstat_payload)
+                  payload_length = io.remote.out.read(4).unpack("N")[0]
+                  payload = io.remote.out.read(payload_length)
+                  expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  expect( packet[:"request-id"]  ).to eq fsetstat_request_id
+                  expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
+                  if version >= 3
+                    expect( packet[:"error message"] ).to eq "Permission denied"
+                    expect( packet[:"language tag"]  ).to eq ""
+                  end
+                  expect( File.stat(filename).size       ).to eq newattrs[:"size"]        if newattrs.has_key?(:"size")
+                  expect( File.stat(filename).mode       ).to eq newattrs[:"permissions"] if newattrs.has_key?(:"permissions")
+                  expect( File.stat(filename).atime.to_i ).to eq newattrs[:"atime"]       if newattrs.has_key?(:"atime")
+                  expect( File.stat(filename).mtime.to_i ).to eq newattrs[:"mtime"]       if newattrs.has_key?(:"mtime")
+                  expect( File.stat(filename).uid        ).to eq oldattrs[:"uid"]         if oldattrs.has_key?(:"uid")
+                  expect( File.stat(filename).gid        ).to eq oldattrs[:"gid"]         if oldattrs.has_key?(:"gid")
+                end
+              end
+
+              context "when file is opened for read" do
+                let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_READ }
+
+                it "returns status response" do
+                  io.remote.in.write ([fsetstat_payload.bytesize].pack("N") + fsetstat_payload)
+                  payload_length = io.remote.out.read(4).unpack("N")[0]
+                  payload = io.remote.out.read(payload_length)
+                  expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  expect( packet[:"request-id"]  ).to eq fsetstat_request_id
+                  expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+                  if version >= 3
+                    expect( packet[:"error message"] ).to eq "not opened for writing"
+                    expect( packet[:"language tag"]  ).to eq ""
+                  end
+                  expect( File.stat(filename).size       ).to eq oldattrs[:"size"]        if oldattrs.has_key?(:"size")
+                  expect( File.stat(filename).mode       ).to eq oldattrs[:"permissions"] if oldattrs.has_key?(:"permissions")
+                  expect( File.stat(filename).atime.to_i ).to eq oldattrs[:"atime"]       if oldattrs.has_key?(:"atime")
+                  expect( File.stat(filename).mtime.to_i ).to eq oldattrs[:"mtime"]       if oldattrs.has_key?(:"mtime")
+                  expect( File.stat(filename).uid        ).to eq oldattrs[:"uid"]         if oldattrs.has_key?(:"uid")
+                  expect( File.stat(filename).gid        ).to eq oldattrs[:"gid"]         if oldattrs.has_key?(:"gid")
+                end
+              end
             end
           end
 
