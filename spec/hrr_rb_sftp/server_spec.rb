@@ -321,67 +321,174 @@ RSpec.describe HrrRbSftp::Server do
 
           context "with SSH_FXF_WRITE flag" do
             let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_WRITE }
-            let(:attrs){ {:"permissions" => permissions} }
-            let(:permissions){ 0644 }
 
-            it "returns handle response" do
-              expect(::File).to receive(:open).with(filename, ::File::WRONLY, permissions).and_return(handle)
-              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
-              payload_length = io.remote.out.read(4).unpack("N")[0]
-              payload = io.remote.out.read(payload_length)
-              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
-              expect( packet[:"request-id"]  ).to eq request_id
-              expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+            context "without permissions attribute" do
+              let(:attrs){ {} }
+
+              it "returns handle response" do
+                expect(::File).to receive(:open).with(filename, ::File::WRONLY).and_return(handle)
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                expect( packet[:"request-id"]  ).to eq request_id
+                expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              end
+            end
+
+            context "with permissions attribute" do
+              let(:attrs){ {:"permissions" => permissions} }
+              let(:permissions){ 0644 }
+
+              it "returns handle response" do
+                expect(::File).to receive(:open).with(filename, ::File::WRONLY).and_return(handle)
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                expect( packet[:"request-id"]  ).to eq request_id
+                expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              end
             end
           end
 
           context "with SSH_FXF_READ and SSH_FXF_WRITE flags" do
             let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_READ | version_class::Packet::SSH_FXP_OPEN::SSH_FXF_WRITE }
-            let(:attrs){ {} }
 
-            it "returns handle response" do
-              expect(::File).to receive(:open).with(filename, ::File::RDWR).and_return(handle)
-              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
-              payload_length = io.remote.out.read(4).unpack("N")[0]
-              payload = io.remote.out.read(payload_length)
-              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
-              expect( packet[:"request-id"]  ).to eq request_id
-              expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+            context "without permissions attribute" do
+              let(:attrs){ {} }
+
+              it "returns handle response" do
+                expect(::File).to receive(:open).with(filename, ::File::RDWR).and_return(handle)
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                expect( packet[:"request-id"]  ).to eq request_id
+                expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              end
+            end
+
+            context "with permissions attribute" do
+              let(:attrs){ {:"permissions" => permissions} }
+              let(:permissions){ 0644 }
+
+              it "returns handle response" do
+                expect(::File).to receive(:open).with(filename, ::File::RDWR).and_return(handle)
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                expect( packet[:"request-id"]  ).to eq request_id
+                expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              end
             end
           end
 
           context "with SSH_FXF_WRITE and SSH_FXF_APPEND flags" do
             let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_WRITE | version_class::Packet::SSH_FXP_OPEN::SSH_FXF_APPEND }
-            let(:attrs){ {} }
 
-            it "returns handle response" do
-              expect(::File).to receive(:open).with(filename, ::File::WRONLY | ::File::APPEND).and_return(handle)
-              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
-              payload_length = io.remote.out.read(4).unpack("N")[0]
-              payload = io.remote.out.read(payload_length)
-              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
-              expect( packet[:"request-id"]  ).to eq request_id
-              expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+            context "without permissions attribute" do
+              let(:attrs){ {} }
+
+              it "returns handle response" do
+                expect(::File).to receive(:open).with(filename, ::File::WRONLY | ::File::APPEND).and_return(handle)
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                expect( packet[:"request-id"]  ).to eq request_id
+                expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              end
+            end
+
+            context "with permissions attribute" do
+              let(:attrs){ {:"permissions" => permissions} }
+              let(:permissions){ 0644 }
+
+              it "returns handle response" do
+                expect(::File).to receive(:open).with(filename, ::File::WRONLY | ::File::APPEND).and_return(handle)
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                expect( packet[:"request-id"]  ).to eq request_id
+                expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              end
+            end
+          end
+
+          context "with SSH_FXF_WRITE and SSH_FXF_CREAT flags" do
+            let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_WRITE | version_class::Packet::SSH_FXP_OPEN::SSH_FXF_CREAT }
+            context "without permissions attribute" do
+              let(:attrs){ {} }
+
+              it "returns handle response" do
+                expect(::File).to receive(:open).with(filename, ::File::WRONLY | ::File::CREAT).and_return(handle)
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                expect( packet[:"request-id"]  ).to eq request_id
+                expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              end
+            end
+
+            context "with permissions attribute" do
+              let(:attrs){ {:"permissions" => permissions} }
+              let(:permissions){ 0644 }
+
+              it "returns handle response" do
+                expect(::File).to receive(:open).with(filename, ::File::WRONLY | ::File::CREAT, permissions).and_return(handle)
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                expect( packet[:"request-id"]  ).to eq request_id
+                expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              end
             end
           end
 
           context "with SSH_FXF_WRITE, SSH_FXF_CREAT, SSH_FXF_TRUNC, and SSH_FXF_EXCL flags" do
             let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_WRITE | version_class::Packet::SSH_FXP_OPEN::SSH_FXF_CREAT | version_class::Packet::SSH_FXP_OPEN::SSH_FXF_TRUNC | version_class::Packet::SSH_FXP_OPEN::SSH_FXF_EXCL }
-            let(:attrs){ {:"permissions" => permissions} }
-            let(:permissions){ 0644 }
+            context "without permissions attribute" do
+              let(:attrs){ {} }
 
-            it "returns handle response" do
-              expect(::File).to receive(:open).with(filename, ::File::WRONLY | ::File::CREAT | ::File::TRUNC | ::File::EXCL, permissions).and_return(handle)
-              io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
-              payload_length = io.remote.out.read(4).unpack("N")[0]
-              payload = io.remote.out.read(payload_length)
-              expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
-              expect( packet[:"request-id"]  ).to eq request_id
-              expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              it "returns handle response" do
+                expect(::File).to receive(:open).with(filename, ::File::WRONLY | ::File::CREAT | ::File::TRUNC | ::File::EXCL).and_return(handle)
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                expect( packet[:"request-id"]  ).to eq request_id
+                expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              end
+            end
+
+            context "with permissions attribute" do
+              let(:attrs){ {:"permissions" => permissions} }
+              let(:permissions){ 0644 }
+
+              it "returns handle response" do
+                expect(::File).to receive(:open).with(filename, ::File::WRONLY | ::File::CREAT | ::File::TRUNC | ::File::EXCL, permissions).and_return(handle)
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                expect( packet[:"request-id"]  ).to eq request_id
+                expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
+              end
             end
           end
 

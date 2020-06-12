@@ -68,7 +68,7 @@ module HrrRbSftp
             begin
               flags = convert_pflags_to_flags request[:"pflags"]
               args = [request[:"filename"], flags]
-              if request[:"attrs"].has_key?(:"permissions")
+              if (flags & ::File::CREAT == ::File::CREAT) && request[:"attrs"].has_key?(:"permissions")
                 args.push request[:"attrs"][:"permissions"]
               end
               file = ::File.open(*args)
