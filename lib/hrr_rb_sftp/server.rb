@@ -104,12 +104,15 @@ module HrrRbSftp
     def respond_to_requests
       log_info { "start respond_to_requests" }
 
-      log_info { "start request and response loop" }
-      while request = @receiver.receive
-        response = @protocol.respond_to request
-        @sender.send response
+      begin
+        log_info { "start request and response loop" }
+        while request = @receiver.receive
+          response = @protocol.respond_to request
+          @sender.send response
+        end
+      ensure
+        log_info { "request and response loop finished" }
       end
-      log_info { "request and response loop finished" }
     end
 
     def close_handles
