@@ -2154,7 +2154,7 @@ RSpec.describe HrrRbSftp::Server do
             version_class::Packet::SSH_FXP_MKDIR.new({}).encode(mkdir_packet)
           }
           let(:request_id){ 1 }
-          let(:attrs){ {} }
+          let(:attrs){ {:"permissions" => 040700} }
 
           context "when request is valid" do
             let(:path){ "newdir" }
@@ -2174,6 +2174,10 @@ RSpec.describe HrrRbSftp::Server do
               if version >= 3
                 expect( packet[:"error message"] ).to eq "Success"
                 expect( packet[:"language tag"]  ).to eq ""
+              end
+              expect( Dir.exist?(path) ).to be true
+              if version >= 3
+                expect( File.stat(path).mode ).to eq attrs[:"permissions"]
               end
             end
           end

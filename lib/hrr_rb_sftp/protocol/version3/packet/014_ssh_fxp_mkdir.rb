@@ -32,7 +32,11 @@ module HrrRbSftp
           #
           def respond_to request
             begin
-              Dir.mkdir request[:"path"]
+              args = [request[:"path"]]
+              if request[:"attrs"].has_key?(:"permissions")
+                args.push request[:"attrs"][:"permissions"]
+              end
+              Dir.mkdir(*args)
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
