@@ -2,17 +2,33 @@ module HrrRbSftp
   class Protocol
     class Version1
       module Packet
+
+        #
+        # This class implements SFTP protocol version 1 SSH_FXP_CLOSE packet type, format, and responder.
+        #
         class SSH_FXP_CLOSE
           include Common::Packetable
 
+          #
+          # Represents SSH_FXP_CLOSE packet type.
+          #
           TYPE = 4
 
+          #
+          # Represents SSH_FXP_CLOSE packet format.
+          #
           FORMAT = [
             [DataType::Byte,   :"type"      ],
             [DataType::Uint32, :"request-id"],
             [DataType::String, :"handle"    ],
           ]
 
+          #
+          # Responds to SSH_FXP_CLOSE request.
+          #
+          # @param request [Hash{Symbol=>Object}] SSH_FXP_CLOSE request represented in Hash.
+          # @return [Hash{Symbol=>Object}] Response represented in Hash. Its type is SSH_FXP_STATUS.
+          #
           def respond_to request
             begin
               raise "Specified handle does not exist" unless @handles.has_key?(request[:"handle"])

@@ -2,17 +2,33 @@ module HrrRbSftp
   class Protocol
     class Version1
       module Packet
+
+        #
+        # This class implements SFTP protocol version 1 SSH_FXP_STAT packet type, format, and responder.
+        #
         class SSH_FXP_STAT
           include Common::Packetable
 
+          #
+          # Represents SSH_FXP_STAT packet type.
+          #
           TYPE = 17
 
+          #
+          # Represents SSH_FXP_STAT packet format.
+          #
           FORMAT = [
             [DataType::Byte,   :"type"      ],
             [DataType::Uint32, :"request-id"],
             [DataType::String, :"path"      ],
           ]
 
+          #
+          # Responds to SSH_FXP_STAT request.
+          #
+          # @param request [Hash{Symbol=>Object}] SSH_FXP_STAT request represented in Hash.
+          # @return [Hash{Symbol=>Object}] Response represented in Hash. In case of success, its type is SSH_FXP_ATTRS. In other cases, its type is SSH_FXP_STATUS.
+          #
           def respond_to request
             begin
               stat = File.stat(request[:"path"])

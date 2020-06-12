@@ -2,17 +2,33 @@ module HrrRbSftp
   class Protocol
     class Version1
       module Packet
+
+        #
+        # This class implements SFTP protocol version 1 SSH_FXP_RMDIR packet type, format, and responder.
+        #
         class SSH_FXP_RMDIR
           include Common::Packetable
 
+          #
+          # Represents SSH_FXP_RMDIR packet type.
+          #
           TYPE = 15
 
+          #
+          # Represents SSH_FXP_RMDIR packet format.
+          #
           FORMAT = [
             [DataType::Byte,   :"type"      ],
             [DataType::Uint32, :"request-id"],
             [DataType::String, :"path"      ],
           ]
 
+          #
+          # Responds to SSH_FXP_RMDIR request.
+          #
+          # @param request [Hash{Symbol=>Object}] SSH_FXP_RMDIR request represented in Hash.
+          # @return [Hash{Symbol=>Object}] Response represented in Hash. Its type is SSH_FXP_STATUS.
+          #
           def respond_to request
             begin
               Dir.rmdir request[:"path"]
