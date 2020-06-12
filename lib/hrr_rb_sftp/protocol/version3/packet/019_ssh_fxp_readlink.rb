@@ -2,17 +2,33 @@ module HrrRbSftp
   class Protocol
     class Version3
       module Packet
+
+        #
+        # This class implements SFTP protocol version 1 SSH_FXP_READLINK packet type, format, and responder.
+        #
         class SSH_FXP_READLINK
           include Common::Packetable
 
+          #
+          # Represents SSH_FXP_READLINK packet type.
+          #
           TYPE = 19
 
+          #
+          # Represents SSH_FXP_READLINK packet format.
+          #
           FORMAT = [
             [DataType::Byte,   :"type"      ],
             [DataType::Uint32, :"request-id"],
             [DataType::String, :"path"      ],
           ]
 
+          #
+          # Responds to SSH_FXP_READLINK request.
+          #
+          # @param request [Hash{Symbol=>Object}] SSH_FXP_READLINK request represented in Hash.
+          # @return [Hash{Symbol=>Object}] Response represented in Hash. In case of success, its type is SSH_FXP_NAME. In other cases, its type is SSH_FXP_STATUS.
+          #
           def respond_to request
             begin
               {
