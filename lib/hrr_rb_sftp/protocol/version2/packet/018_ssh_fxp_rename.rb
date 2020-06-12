@@ -2,11 +2,21 @@ module HrrRbSftp
   class Protocol
     class Version2
       module Packet
+
+        #
+        # This class implements SFTP protocol version 2 SSH_FXP_RENAME packet type, format, and responder.
+        #
         class SSH_FXP_RENAME
           include Common::Packetable
 
+          #
+          # Represents SSH_FXP_RENAME packet type.
+          #
           TYPE = 18
 
+          #
+          # Represents SSH_FXP_RENAME packet format.
+          #
           FORMAT = [
             [DataType::Byte,   :"type"      ],
             [DataType::Uint32, :"request-id"],
@@ -14,6 +24,12 @@ module HrrRbSftp
             [DataType::String, :"newpath"   ],
           ]
 
+          #
+          # Responds to SSH_FXP_RENAME request.
+          #
+          # @param request [Hash{Symbol=>Object}] SSH_FXP_RENAME request represented in Hash.
+          # @return [Hash{Symbol=>Object}] Response represented in Hash. Its type is SSH_FXP_STATUS.
+          #
           def respond_to request
             oldpath = request[:"oldpath"]
             newpath = request[:"newpath"]
