@@ -20,8 +20,8 @@ module HrrRbSftp
           FORMAT = [
             [DataType::Byte,   :"type"      ],
             [DataType::Uint32, :"request-id"],
-            [DataType::String, :"linkpath"  ],
             [DataType::String, :"targetpath"],
+            [DataType::String, :"linkpath"  ],
           ]
 
           #

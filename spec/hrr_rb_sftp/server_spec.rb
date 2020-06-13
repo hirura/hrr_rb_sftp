@@ -2792,8 +2792,8 @@ RSpec.describe HrrRbSftp::Server do
             {
               :"type"       => version_class::Packet::SSH_FXP_SYMLINK::TYPE,
               :"request-id" => request_id,
-              :"linkpath"   => linkpath,
               :"targetpath" => targetpath,
+              :"linkpath"   => linkpath,
             }
           }
           let(:symlink_payload){
@@ -2802,8 +2802,8 @@ RSpec.describe HrrRbSftp::Server do
 
           context "when request is valid" do
             let(:request_id){ 1 }
-            let(:linkpath){ "linkpath" }
             let(:targetpath){ "targetpath" }
+            let(:linkpath){ "linkpath" }
 
             after :example do
               FileUtils.remove_entry_secure(linkpath)
@@ -2827,8 +2827,8 @@ RSpec.describe HrrRbSftp::Server do
 
           context "when request linkpath is not accessible" do
             let(:request_id){ 1 }
-            let(:linkpath){ "dir000/linkpath" }
             let(:targetpath){ "targetpath" }
+            let(:linkpath){ "dir000/linkpath" }
 
             before :example do
               Dir.mkdir(File.dirname(linkpath))
@@ -2857,8 +2857,8 @@ RSpec.describe HrrRbSftp::Server do
 
           context "when request linkpath already exists" do
             let(:request_id){ 1 }
-            let(:linkpath){ "linkpath" }
             let(:targetpath){ "targetpath" }
+            let(:linkpath){ "linkpath" }
 
             before :example do
               FileUtils.touch(linkpath)
@@ -2885,8 +2885,8 @@ RSpec.describe HrrRbSftp::Server do
 
           context "when request path causes other error" do
             let(:request_id){ 1 }
-            let(:linkpath){ ("a".."z").to_a.join * 10 }
             let(:targetpath){ "targetpath" }
+            let(:linkpath){ ("a".."z").to_a.join * 10 }
 
             it "returns status response" do
               io.remote.in.write ([symlink_payload.bytesize].pack("N") + symlink_payload)

@@ -13,6 +13,7 @@ hrr_rb_sftp can be run on SSH 2.0 server like OpenSSH or [hrr_rb_ssh](https://gi
 - [Usage](#usage)
     - [hrr\_rb\_ssh's SFTP subsystem](#hrr_rb_sshs-sftp-subsystem)
     - [OpenSSH's SFTP subsystem](#opensshs-sftp-subsystem)
+- [Note](#note)
 - [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
@@ -114,6 +115,18 @@ hrr_rb_sftp can be an alternative with replacing the line in the config file. (A
     Subsystem   sftp    /path/to/hrr_rb_sftp_server.rb
 
 Where, the /path/to/hrr_rb_sftp_server.rb code is the same as shown above.
+
+## Note
+
+- Reversal of SSH_FXP_SYMLINK arguments  
+  Because OpenSSH's sftp-server implementation takes SSH_FXP_SYMLINK request linkpath and targetpath arguments in reverse order, this library follows it.  
+  The SSH_FXP_SYMLINK request format is as follows:  
+
+  ```
+  uint32          id
+  string          targetpath
+  string          linkpath
+  ```
 
 ## Development
 

@@ -15,16 +15,16 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_SYMLINK do
     {
       :"type"       => type,
       :"request-id" => 1,
-      :"linkpath"   => "linkpath",
       :"targetpath" => "targetpath",
+      :"linkpath"   => "linkpath",
     }
   }
   let(:payload){
     [
       HrrRbSftp::Protocol::Version3::DataType::Byte.encode(packet[:"type"]),
       HrrRbSftp::Protocol::Version3::DataType::Uint32.encode(packet[:"request-id"]),
-      HrrRbSftp::Protocol::Version3::DataType::String.encode(packet[:"linkpath"]),
       HrrRbSftp::Protocol::Version3::DataType::String.encode(packet[:"targetpath"]),
+      HrrRbSftp::Protocol::Version3::DataType::String.encode(packet[:"linkpath"]),
     ].join
   }
 
