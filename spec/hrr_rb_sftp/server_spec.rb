@@ -9,6 +9,15 @@ RSpec.describe HrrRbSftp::Server do
     )
   }
 
+  let(:logger){
+    if ENV["LOGGING"]
+      require "logger"
+      logger = Logger.new $stdout
+      logger.level = ENV["LOGGING"]
+      logger
+    end
+  }
+
   after :example do
     io.remote.in.close  rescue nil
     io.local.in.close   rescue nil
@@ -20,13 +29,13 @@ RSpec.describe HrrRbSftp::Server do
 
   describe ".new" do
     it "takes no argument" do
-      expect{ described_class.new }.not_to raise_error
+      expect{ described_class.new logger: logger }.not_to raise_error
     end
   end
 
   describe "#start" do
     let(:server){
-      described_class.new
+      described_class.new logger: logger
     }
 
     [1, 2, 3].each do |version|
@@ -67,7 +76,7 @@ RSpec.describe HrrRbSftp::Server do
     context "when input IO is closed before receiving SSH_FXP_INIT" do
       it "raises an error when failed receiving SSH_FXP_INIT" do
         io.remote.in.close
-        expect{ described_class.new.start *io.local.to_a }.to raise_error RuntimeError, "Failed receiving SSH_FXP_INIT"
+        expect{ described_class.new(logger: logger).start *io.local.to_a }.to raise_error RuntimeError, "Failed receiving SSH_FXP_INIT"
       end
     end
 
@@ -84,7 +93,7 @@ RSpec.describe HrrRbSftp::Server do
 
       before :example do
         @thread = Thread.new{
-          server = described_class.new
+          server = described_class.new logger: logger
           server.start *io.local.to_a
         }
       end
@@ -126,7 +135,7 @@ RSpec.describe HrrRbSftp::Server do
       HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT.new({}).encode(init_packet)
     }
 
-    let(:server){ described_class.new }
+    let(:server){ described_class.new logger: logger }
 
     before :example do
       io.remote.in.write ([init_payload.bytesize].pack("N") + init_payload)
@@ -176,7 +185,7 @@ RSpec.describe HrrRbSftp::Server do
   end
 
   describe "#close_handles" do
-    let(:server){ described_class.new }
+    let(:server){ described_class.new logger: logger }
     let(:protocol){ double("protocol") }
 
     before :example do
@@ -202,7 +211,7 @@ RSpec.describe HrrRbSftp::Server do
 
     before :example do
       @thread = Thread.new{
-        server = described_class.new
+        server = described_class.new logger: logger
         server.start *io.local.to_a
       }
       io.remote.in.write ([init_payload.bytesize].pack("N") + init_payload)
