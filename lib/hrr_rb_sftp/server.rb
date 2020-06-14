@@ -71,7 +71,10 @@ module HrrRbSftp
       version = [remote_version, local_version].min
       log_info { "negotiated version: #{version}" }
 
-      send_fxp_version version
+      extensions = Protocol.list_extensions(version)
+      log_info { "extensions: #{extensions}" }
+
+      send_fxp_version version, extensions
 
       version
     end
@@ -89,13 +92,13 @@ module HrrRbSftp
       packet[:"version"]
     end
 
-    def send_fxp_version version
+    def send_fxp_version version, extensions
       log_debug { "start send_fxp_version" }
 
       packet = {
         :"type"       => Protocol::Common::Packet::SSH_FXP_VERSION::TYPE,
         :"version"    => version,
-        :"extensions" => [],
+        :"extensions" => extensions,
       }
       payload = Protocol::Common::Packet::SSH_FXP_VERSION.new({}, logger: logger).encode packet
       @sender.send payload

@@ -14,6 +14,19 @@ module HrrRbSftp
     end
 
     #
+    # @return [Array] A list of extensions that the library supports.
+    #
+    def self.list_extensions version
+      version_class = self.const_get(:"Version#{version}")
+      if version_class.const_defined?(:Extension)
+        extension_modules = version_class::Extension.constants.map{|c| version_class::Extension.const_get(c)}.select{|m| m.const_defined?(:EXTENDED_NAME)}
+        extension_modules.map{|m| {:"extension-name" => m::EXTENDED_NAME, :"extension-data" => m::EXTENDED_DATA}}
+      else
+        []
+      end
+    end
+
+    #
     # @param logger [Logger] logger.
     #
     def initialize version, logger: nil

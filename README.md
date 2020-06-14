@@ -14,6 +14,7 @@ hrr_rb_sftp can be run on SSH 2.0 server like OpenSSH or [hrr_rb_ssh](https://gi
     - [hrr\_rb\_ssh's SFTP subsystem](#hrr_rb_sshs-sftp-subsystem)
     - [OpenSSH's SFTP subsystem](#opensshs-sftp-subsystem)
 - [Note](#note)
+- [Supported extensions](#supported-extensions)
 - [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
@@ -127,6 +128,12 @@ Where, the /path/to/hrr_rb_sftp_server.rb code is the same as shown above.
   string          targetpath
   string          linkpath
   ```
+
+## Supported extensions
+
+The followins extensions are supported.
+
+- hardlink@openssh.com version 1
 
 ## Development
 
