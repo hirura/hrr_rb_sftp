@@ -31,15 +31,18 @@ module HrrRbSftp
           #
           def respond_to request
             begin
+              log_debug { "realpath = File.realpath(#{request[:"path"].inspect})" }
+              realpath = File.realpath(request[:"path"])
               {
                 :"type"        => Packet::SSH_FXP_NAME::TYPE,
                 :"request-id"  => request[:"request-id"],
                 :"count"       => 1,
-                :"filename[0]" => File.realpath(request[:"path"]),
-                :"longname[0]" => File.realpath(request[:"path"]),
+                :"filename[0]" => realpath,
+                :"longname[0]" => realpath,
                 :"attrs[0]"    => {},
               }
-            rescue Errno::ENOENT
+            rescue Errno::ENOENT => e
+              log_debug { e.message }
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -47,7 +50,8 @@ module HrrRbSftp
                 :"error message" => "No such file or directory",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES => e
+              log_debug { e.message }
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

@@ -30,12 +30,14 @@ module HrrRbSftp
           # @return [Hash{Symbol=>Object}] Response represented in Hash. Its type is SSH_FXP_NAME.
           #
           def respond_to request
+            log_debug { "absolute_path = File.absolute_path(#{request[:"path"].inspect})" }
+            absolute_path = File.absolute_path(request[:"path"])
             {
               :"type"        => SSH_FXP_NAME::TYPE,
               :"request-id"  => request[:"request-id"],
               :"count"       => 1,
-              :"filename[0]" => File.absolute_path(request[:"path"]),
-              :"longname[0]" => File.absolute_path(request[:"path"]),
+              :"filename[0]" => absolute_path,
+              :"longname[0]" => absolute_path,
               :"attrs[0]"    => {},
             }
           end

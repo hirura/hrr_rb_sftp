@@ -34,9 +34,12 @@ module HrrRbSftp
           def respond_to request
             begin
               raise "Specified handle does not exist" unless @handles.has_key?(request[:"handle"])
+              log_debug { "file = @handles[#{request[:"handle"].inspect}]" }
               file = @handles[request[:"handle"]]
+              log_debug { "file.pos = #{request[:"offset"].inspect}" }
               file.pos = request[:"offset"]
-              file.write request[:"data"]
+              log_debug { "file.write(#{request[:"data"].inspect})" }
+              file.write(request[:"data"])
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

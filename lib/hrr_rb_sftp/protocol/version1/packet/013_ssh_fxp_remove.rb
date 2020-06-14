@@ -31,6 +31,7 @@ module HrrRbSftp
           #
           def respond_to request
             begin
+              log_debug { "File.delete(#{request[:"filename"].inspect})" }
               File.delete(request[:"filename"])
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
@@ -39,7 +40,8 @@ module HrrRbSftp
                 :"error message" => "Success",
                 :"language tag"  => "",
               }
-            rescue Errno::ENOENT
+            rescue Errno::ENOENT => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -47,7 +49,8 @@ module HrrRbSftp
                 :"error message" => "No such file or directory",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

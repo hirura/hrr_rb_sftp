@@ -31,15 +31,19 @@ module HrrRbSftp
           #
           def respond_to request
             begin
+              log_debug { "dir = Dir.open(#{request[:"path"].inspect})" }
               dir = ::Dir.open(request[:"path"])
+              log_debug { "handle = #{dir.object_id.to_s(16).inspect}" }
               handle = dir.object_id.to_s(16)
+              log_debug { "@handles[#{handle.inspect}] = dir" }
               @handles[handle] = dir
               {
                 :"type"       => SSH_FXP_HANDLE::TYPE,
                 :"request-id" => request[:"request-id"],
                 :"handle"     => handle,
               }
-            rescue Errno::ENOENT
+            rescue Errno::ENOENT => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -47,7 +51,8 @@ module HrrRbSftp
                 :"error message" => "No such file or directory",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -55,7 +60,8 @@ module HrrRbSftp
                 :"error message" => "Permission denied",
                 :"language tag"  => "",
               }
-            rescue Errno::ENOTDIR
+            rescue Errno::ENOTDIR => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

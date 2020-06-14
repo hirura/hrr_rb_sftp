@@ -31,6 +31,7 @@ module HrrRbSftp
           #
           def respond_to request
             begin
+              log_debug { "File.stat(#{request[:"path"].inspect})" }
               stat = File.stat(request[:"path"])
               attrs = Hash.new
               attrs[:"size"]        = stat.size       if stat.size
@@ -44,7 +45,8 @@ module HrrRbSftp
                 :"request-id" => request[:"request-id"],
                 :"attrs"      => attrs,
               }
-            rescue Errno::ENOENT
+            rescue Errno::ENOENT => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -52,7 +54,8 @@ module HrrRbSftp
                 :"error message" => "No such file or directory",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

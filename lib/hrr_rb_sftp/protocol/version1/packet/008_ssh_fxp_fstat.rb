@@ -32,7 +32,9 @@ module HrrRbSftp
           def respond_to request
             begin
               raise "Specified handle does not exist" unless @handles.has_key?(request[:"handle"])
+              log_debug { "file = @handles[#{request[:"handle"].inspect}]" }
               file = @handles[request[:"handle"]]
+              log_debug { "file.stat" }
               stat = file.stat
               attrs = Hash.new
               attrs[:"size"]        = stat.size       if stat.size

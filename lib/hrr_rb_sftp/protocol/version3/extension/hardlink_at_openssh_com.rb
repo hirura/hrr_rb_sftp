@@ -49,7 +49,8 @@ module HrrRbSftp
           #
           def respond_to request
             begin
-              File.link request[:"oldpath"], request[:"newpath"]
+              log_debug { "File.link(#{request[:"oldpath"].inspect}, #{request[:"newpath"].inspect})" }
+              File.link(request[:"oldpath"], request[:"newpath"])
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -57,7 +58,8 @@ module HrrRbSftp
                 :"error message" => "Success",
                 :"language tag"  => "",
               }
-            rescue Errno::ENOENT
+            rescue Errno::ENOENT => e
+              log_debug { e.message }
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -65,7 +67,8 @@ module HrrRbSftp
                 :"error message" => "No such file or directory",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES => e
+              log_debug { e.message }
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -73,7 +76,8 @@ module HrrRbSftp
                 :"error message" => "Permission denied",
                 :"language tag"  => "",
               }
-            rescue Errno::EEXIST
+            rescue Errno::EEXIST => e
+              log_debug { e.message }
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

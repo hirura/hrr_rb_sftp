@@ -32,6 +32,7 @@ module HrrRbSftp
           #
           def respond_to request
             begin
+              log_debug { "File.symlink(#{request[:"targetpath"].inspect}, #{request[:"linkpath"].inspect})" }
               File.symlink request[:"targetpath"], request[:"linkpath"]
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
@@ -40,7 +41,8 @@ module HrrRbSftp
                 :"error message" => "Success",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES => e
+              log_debug { e.message }
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -48,7 +50,8 @@ module HrrRbSftp
                 :"error message" => "Permission denied",
                 :"language tag"  => "",
               }
-            rescue Errno::EEXIST
+            rescue Errno::EEXIST => e
+              log_debug { e.message }
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

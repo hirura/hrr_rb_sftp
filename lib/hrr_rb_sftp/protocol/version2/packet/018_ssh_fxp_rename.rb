@@ -33,7 +33,9 @@ module HrrRbSftp
           def respond_to request
             oldpath = request[:"oldpath"]
             newpath = request[:"newpath"]
+            log_debug { "File.exist?(#{newpath.inspect})" }
             if File.exist?(newpath)
+              log_debug { "File exists" }
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -42,7 +44,9 @@ module HrrRbSftp
                 :"language tag"  => "",
               }
             else
+              log_debug { "File does not exist" }
               begin
+                log_debug { "File.rename(#{oldpath.inspect}, #{newpath.inspect})" }
                 File.rename(oldpath, newpath)
                 {
                   :"type"          => Packet::SSH_FXP_STATUS::TYPE,
@@ -51,7 +55,8 @@ module HrrRbSftp
                   :"error message" => "Success",
                   :"language tag"  => "",
                 }
-              rescue Errno::ENOENT
+              rescue Errno::ENOENT => e
+                log_debug { e.message }
                 {
                   :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                   :"request-id"    => request[:"request-id"],
@@ -59,7 +64,8 @@ module HrrRbSftp
                   :"error message" => "No such file or directory",
                   :"language tag"  => "",
                 }
-              rescue Errno::EACCES
+              rescue Errno::EACCES => e
+                log_debug { e.message }
                 {
                   :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                   :"request-id"    => request[:"request-id"],

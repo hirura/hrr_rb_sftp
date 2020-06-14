@@ -33,12 +33,25 @@ module HrrRbSftp
           def respond_to request
             begin
               raise "Specified handle does not exist" unless @handles.has_key?(request[:"handle"])
+              log_debug { "file = @handles[#{request[:"handle"].inspect}]" }
               file = @handles[request[:"handle"]]
               attrs = request[:"attrs"]
-              file.truncate(attrs[:"size"])                           if attrs.has_key?(:"size")
-              file.chmod(attrs[:"permissions"])                       if attrs.has_key?(:"permissions")
-              File.utime(attrs[:"atime"], attrs[:"mtime"], file.path) if attrs.has_key?(:"atime") && attrs.has_key?(:"mtime")
-              file.chown(attrs[:"uid"], attrs[:"gid"])                if attrs.has_key?(:"uid") && attrs.has_key?(:"gid")
+              if attrs.has_key?(:"size")
+                log_debug { "file.truncate(#{attrs[:"size"].inspect})" }
+                file.truncate(attrs[:"size"])
+              end
+              if attrs.has_key?(:"permissions")
+                log_debug { "file.chmod(#{attrs[:"permissions"].inspect})" }
+                file.chmod(attrs[:"permissions"])
+              end
+              if attrs.has_key?(:"atime") && attrs.has_key?(:"mtime")
+                log_debug { "File.utime(#{attrs[:"atime"].inspect}, #{attrs[:"mtime"].inspect}, #{file.path.inspect})" }
+                File.utime(attrs[:"atime"], attrs[:"mtime"], file.path)
+              end
+              if attrs.has_key?(:"uid") && attrs.has_key?(:"gid")
+                log_debug { "file.chown(#{attrs[:"uid"].inspect}, #{attrs[:"gid"].inspect})" }
+                file.chown(attrs[:"uid"], attrs[:"gid"])
+              end
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -46,7 +59,8 @@ module HrrRbSftp
                 :"error message" => "Success",
                 :"language tag"  => "",
               }
-            rescue Errno::EPERM
+            rescue Errno::EPERM => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

@@ -71,8 +71,11 @@ module HrrRbSftp
               if (flags & ::File::CREAT == ::File::CREAT) && request[:"attrs"].has_key?(:"permissions")
                 args.push request[:"attrs"][:"permissions"]
               end
+              log_debug { "file = File.open(#{args.map(&:inspect).join(", ")})" }
               file = ::File.open(*args)
+              log_debug { "handle = #{file.object_id.to_s(16).inspect}" }
               handle = file.object_id.to_s(16)
+              log_debug { "@handles[#{handle.inspect}] = file" }
               @handles[handle] = file
               {
                 :"type"       => SSH_FXP_HANDLE::TYPE,
@@ -80,6 +83,7 @@ module HrrRbSftp
                 :"handle"     => handle,
               }
             rescue Error => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -87,7 +91,8 @@ module HrrRbSftp
                 :"error message" => e.message,
                 :"language tag"  => "",
               }
-            rescue Errno::ENOENT
+            rescue Errno::ENOENT => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -95,7 +100,8 @@ module HrrRbSftp
                 :"error message" => "No such file or directory",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

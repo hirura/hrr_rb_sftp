@@ -36,6 +36,7 @@ module HrrRbSftp
               if request[:"attrs"].has_key?(:"permissions")
                 args.push request[:"attrs"][:"permissions"]
               end
+              log_debug { "Dir.mkdir(#{args.map(&:inspect).join(", ")})" }
               Dir.mkdir(*args)
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
@@ -44,7 +45,8 @@ module HrrRbSftp
                 :"error message" => "Success",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES => e
+              log_debug { e.message }
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -52,7 +54,8 @@ module HrrRbSftp
                 :"error message" => "Permission denied",
                 :"language tag"  => "",
               }
-            rescue Errno::EEXIST
+            rescue Errno::EEXIST => e
+              log_debug { e.message }
               {
                 :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

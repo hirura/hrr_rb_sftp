@@ -31,7 +31,8 @@ module HrrRbSftp
           #
           def respond_to request
             begin
-              Dir.mkdir request[:"path"]
+              log_debug { "Dir.mkdir(#{request[:"path"].inspect})" }
+              Dir.mkdir(request[:"path"])
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -39,7 +40,8 @@ module HrrRbSftp
                 :"error message" => "Success",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -47,7 +49,8 @@ module HrrRbSftp
                 :"error message" => "Permission denied",
                 :"language tag"  => "",
               }
-            rescue Errno::EEXIST
+            rescue Errno::EEXIST => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

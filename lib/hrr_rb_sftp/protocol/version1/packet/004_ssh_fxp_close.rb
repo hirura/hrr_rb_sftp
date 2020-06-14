@@ -33,7 +33,9 @@ module HrrRbSftp
             begin
               raise "Specified handle does not exist" unless @handles.has_key?(request[:"handle"])
               handle = request[:"handle"]
+              log_debug { "@handles[#{handle.inspect}].close" }
               @handles[handle].close rescue nil
+              log_debug { "@handles.delete(#{handle.inspect})" }
               @handles.delete(handle)
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,

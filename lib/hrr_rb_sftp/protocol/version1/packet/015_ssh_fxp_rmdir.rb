@@ -31,7 +31,8 @@ module HrrRbSftp
           #
           def respond_to request
             begin
-              Dir.rmdir request[:"path"]
+              log_debug { "Dir.rmdir(#{request[:"path"].inspect})" }
+              Dir.rmdir(request[:"path"])
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -39,7 +40,8 @@ module HrrRbSftp
                 :"error message" => "Success",
                 :"language tag"  => "",
               }
-            rescue Errno::ENOENT
+            rescue Errno::ENOENT => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -47,7 +49,8 @@ module HrrRbSftp
                 :"error message" => "No such file or directory",
                 :"language tag"  => "",
               }
-            rescue Errno::EACCES
+            rescue Errno::EACCES => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -55,7 +58,8 @@ module HrrRbSftp
                 :"error message" => "Permission denied",
                 :"language tag"  => "",
               }
-            rescue Errno::ENOTDIR
+            rescue Errno::ENOTDIR => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
@@ -63,7 +67,8 @@ module HrrRbSftp
                 :"error message" => "Not a directory",
                 :"language tag"  => "",
               }
-            rescue Errno::ENOTEMPTY
+            rescue Errno::ENOTEMPTY => e
+              log_debug { e.message }
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],

@@ -32,17 +32,23 @@ module HrrRbSftp
           def respond_to request
             begin
               raise "Specified handle does not exist" unless @handles.has_key?(request[:"handle"])
+              log_debug { "dir = @handles[#{request[:"handle"].inspect}]" }
               dir = @handles[request[:"handle"]]
               raise "Specified handle is not directory" unless dir.instance_of?(::Dir)
               entries = ::Array.new
               while entry = dir.read
+                log_debug { "#{entry.inspect} = dir.read" }
+                log_debug { "entries.push #{entry.inspect}" }
                 entries.push entry
               end
               unless entries.empty?
+                log_debug { "entries is not empty" }
+                log_debug { "count = #{entries.size.inspect}" }
+                count = entries.size
                 response = {
                   :"type"       => SSH_FXP_NAME::TYPE,
                   :"request-id" => request[:"request-id"],
-                  :"count"      => entries.size,
+                  :"count"      => count,
                 }
                 entries.each.with_index do |entry, idx|
                   response[:"filename[#{idx}]"] = entry
@@ -51,6 +57,7 @@ module HrrRbSftp
                 end
                 response
               else
+                log_debug { "entries is empty" }
                 {
                   :"type"          => SSH_FXP_STATUS::TYPE,
                   :"request-id"    => request[:"request-id"],
