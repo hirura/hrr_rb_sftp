@@ -3,9 +3,22 @@ module HrrRbSftp
     class Version3
 
       #
-      # This module implements SFTP protocol version 3 extension formats and responders.
+      # This class implements SFTP protocol version 3 extension formats and responders.
       #
-      module Extension
+      class Extension
+
+        #
+        # @return [Hash{Symbol=>Hash{String=>Array<Array(Object, Symbol)>}}] Conditional format used in extended-request packet.
+        #
+        def self.conditional_format
+          @conditional_format ||= (
+            extensions = constants.map{|c| const_get(c)}.select{|c| c.const_defined?(:EXTENDED_NAME)}
+            extended_request_format = extensions.inject(Hash.new){|h, c| h.merge(c.const_defined?(:EXTENDED_FORMAT) ? c::EXTENDED_FORMAT : {})}
+            {
+              :"extended-request" => extended_request_format,
+            }
+          )
+        end
       end
     end
   end

@@ -14,6 +14,12 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extension::HardlinkAtOpensshCom do
     end
   end
 
+  describe ".new" do
+    it "takes handles arguments" do
+      expect{ described_class.new({}) }.not_to raise_error
+    end
+  end
+
   let(:packet){
     {
       :"type"             => HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_EXTENDED::TYPE,

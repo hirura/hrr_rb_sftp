@@ -26,18 +26,17 @@ module HrrRbSftp
           #
           # Represents SSH_FXP_EXTENDED packet conditional format.
           #
-          CONDITIONAL_FORMAT = {
-            :"extended-request" => {
-            },
-          }
-
+          # @example
+          #   {
+          #     :"extended-request" => {
+          #                              "hardlink@openssh.com" => [
+          #                                                          [DataType::String, :"oldpath"],
+          #                                                          [DataType::String, :"newpath"],
+          #                                                        ],
+          #                            },
+          #   }
           #
-          # Represents SSH_FXP_EXTENDED packet conditional responder.
-          #
-          CONDITIONAL_RESPONDER = {
-            :"extended-request" => {
-            },
-          }
+          CONDITIONAL_FORMAT = Extension.conditional_format
 
           #
           # Responds to SSH_FXP_EXTENDED request.
@@ -47,9 +46,13 @@ module HrrRbSftp
           #
           def respond_to request
             begin
+              @extensions ||= (
+                extension_classes = Extension.constants.map{|c| Extension.const_get(c)}.select{|c| c.const_defined?(:EXTENDED_NAME)}
+                extension_classes.inject(Hash.new){|h,c| h.merge(c::EXTENDED_FORMAT.keys.inject(Hash.new){|h,k| h.merge({k => c.new(@handles, logger: logger)})})}
+              )
               extended_request = request[:"extended-request"]
-              if CONDITIONAL_RESPONDER[:"extended-request"].has_key?(extended_request)
-                CONDITIONAL_RESPONDER[:"extended-request"][extended_request].call request
+              if @extensions.has_key?(extended_request)
+                @extensions[extended_request].respond_to request
               else
                 {
                   :"type"          => Packet::SSH_FXP_STATUS::TYPE,

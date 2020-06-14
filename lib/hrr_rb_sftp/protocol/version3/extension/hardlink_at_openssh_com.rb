@@ -1,12 +1,13 @@
 module HrrRbSftp
   class Protocol
     class Version3
-      module Extension
+      class Extension
 
         #
-        # This module implements hardlink@openssh.com version 1 extension format and responder.
+        # This class implements hardlink@openssh.com version 1 extension format and responder.
         #
-        module HardlinkAtOpensshCom
+        class HardlinkAtOpensshCom
+          include Loggable
 
           #
           # Represents hardlink@openssh.com version 1 extension name.
@@ -21,15 +22,32 @@ module HrrRbSftp
           #
           # Represents SSH_FXP_EXTENDED packet additional format for hardlink@openssh.com version 1 extension.
           #
-          HARDLINK_AT_OPENSSH_COM_FORMAT = [
-            [DataType::String, :"oldpath"],
-            [DataType::String, :"newpath"],
-          ]
+          EXTENDED_FORMAT = {
+            "hardlink@openssh.com" => [
+                                        [DataType::String, :"oldpath"],
+                                        [DataType::String, :"newpath"],
+                                      ],
+          }
 
           #
-          # Represents SSH_FXP_EXTENDED packet additional responder for hardlink@openssh.com version 1 extension.
+          # Returns a new instance of the class.
           #
-          HARDLINK_AT_OPENSSH_COM_RESPONDER = lambda{ |request|
+          # @param handles [Hash{String=>File}, Hash{String=>Dir}] A list of opened handles.
+          # @param logger [Logger] Logger.
+          #
+          def initialize handles, logger: nil
+            self.logger = logger
+
+            @handles = handles
+          end
+
+          #
+          # Responds to SSH_FXP_EXTENDED request with hardlink@openssh.com extended-request.
+          #
+          # @param request [Hash{Symbol=>Object}] SSH_FXP_EXTENDED request represented in Hash.
+          # @return [Hash{Symbol=>Object}] Response represented in Hash. Its type is SSH_FXP_STATUS.
+          #
+          def respond_to request
             begin
               File.link request[:"oldpath"], request[:"newpath"]
               {
@@ -64,10 +82,7 @@ module HrrRbSftp
                 :"language tag"  => "",
               }
             end
-          }
-
-          Packet::SSH_FXP_EXTENDED::CONDITIONAL_FORMAT[:"extended-request"]["hardlink@openssh.com"] = HARDLINK_AT_OPENSSH_COM_FORMAT
-          Packet::SSH_FXP_EXTENDED::CONDITIONAL_RESPONDER[:"extended-request"]["hardlink@openssh.com"] = HARDLINK_AT_OPENSSH_COM_RESPONDER
+          end
         end
       end
     end
