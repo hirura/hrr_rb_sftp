@@ -22,7 +22,7 @@ RSpec.describe HrrRbSftp::Protocol::Version1::DataType::Attrs do
     :"permissions" => "10644".to_i(8),
     :"atime"       => Time.now.to_i,
     :"mtime"       => Time.now.to_i,
-    :"extentions"  => [
+    :"extensions"  => [
       [],
       [{:"extension-name" => "name1", :"extension-data" => "data1"}],
       [{:"extension-name" => "name1", :"extension-data" => "data1"}, {:"extension-name" => "name2", :"extension-data" => "data2"}],
@@ -89,7 +89,7 @@ RSpec.describe HrrRbSftp::Protocol::Version1::DataType::Attrs do
           }.join
 
           if targets.any?{|t| t[0] == described_class::SSH_FILEXFER_ATTR_EXTENDED}
-            values[:"extentions"].each do |es|
+            values[:"extensions"].each do |es|
               encoded_extended_count = [es.size.to_s(16).rjust(8, "0")].pack("H*")
               encoded_extensions = es.map{ |e|
                 [e[:"extension-name"], e[:"extension-data"]].map{ |s|
@@ -149,7 +149,7 @@ RSpec.describe HrrRbSftp::Protocol::Version1::DataType::Attrs do
           }.join
 
           if targets.any?{|t| t[0] == described_class::SSH_FILEXFER_ATTR_EXTENDED}
-            values[:"extentions"].each do |es|
+            values[:"extensions"].each do |es|
               encoded_extended_count = [es.size.to_s(16).rjust(8, "0")].pack("H*")
               encoded_extensions = es.map{ |e|
                 [e[:"extension-name"], e[:"extension-data"]].map{ |s|
