@@ -17,6 +17,7 @@
 # The following extensions are supported.
 #   - hardlink@openssh.com
 #   - fsync@openssh.com
+#   - posix-rename@openssh.com
 #
 # @note
 #   - Reversal of SSH_FXP_SYMLINK arguments  
