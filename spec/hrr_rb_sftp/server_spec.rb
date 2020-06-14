@@ -116,7 +116,12 @@ RSpec.describe HrrRbSftp::Server do
             if version < 3
               expect( packet[:"extensions"] ).to eq []
             else
-              expect( packet[:"extensions"] ).to eq [{:"extension-name"=>"hardlink@openssh.com", :"extension-data"=>"1"}]
+              expect( packet[:"extensions"] ).to match_array(
+                [
+                  {:"extension-name"=>"hardlink@openssh.com", :"extension-data"=>"1"},
+                  {:"extension-name"=>"fsync@openssh.com",    :"extension-data"=>"1"},
+                ]
+              )
             end
           end
         end
@@ -3128,6 +3133,95 @@ RSpec.describe HrrRbSftp::Server do
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                 expect( packet[:"error message"] ).to start_with "File name too long"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+
+          context "with fsync@openssh.com extended-request" do
+            let(:extended_packet){
+              {
+                :"type"             => version_class::Packet::SSH_FXP_EXTENDED::TYPE,
+                :"request-id"       => extended_request_id,
+                :"extended-request" => extended_request,
+                :"handle"           => @handle,
+              }
+            }
+            let(:extended_request){ "fsync@openssh.com" }
+
+            context "when request is valid" do
+              let(:open_packet){
+                {
+                  :"type"       => version_class::Packet::SSH_FXP_OPEN::TYPE,
+                  :"request-id" => open_request_id,
+                  :"filename"   => filename,
+                  :"pflags"     => pflags,
+                  :"attrs"      => attrs,
+                }
+              }
+              let(:open_payload){
+                version_class::Packet::SSH_FXP_OPEN.new({}).encode(open_packet)
+              }
+              let(:open_request_id){ 1 }
+              let(:filename){ "filename" }
+              let(:pflags){ version_class::Packet::SSH_FXP_OPEN::SSH_FXF_WRITE | version_class::Packet::SSH_FXP_OPEN::SSH_FXF_CREAT | version_class::Packet::SSH_FXP_OPEN::SSH_FXF_TRUNC }
+              let(:attrs){ {} }
+
+              let(:close_packet){
+                {
+                  :"type"       => version_class::Packet::SSH_FXP_CLOSE::TYPE,
+                  :"request-id" => close_request_id,
+                  :"handle"     => @handle,
+                }
+              }
+              let(:close_payload){
+                version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+              }
+              let(:close_request_id){ 20 }
+
+              let(:extended_request_id){ 10 }
+
+              before :example do
+                io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                @handle = packet[:"handle"]
+              end
+
+              after :example do
+                FileUtils.remove_entry_secure filename
+              end
+
+              it "returns status response" do
+                io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                expect( packet[:"request-id"]    ).to eq extended_request_id
+                expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
+                expect( packet[:"error message"] ).to eq "Success"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+
+            context "when specified handle does not exist" do
+              let(:extended_request_id){ 10 }
+
+              before :example do
+                @handle = "handle"
+              end
+
+              it "returns status response" do
+                io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                expect( packet[:"request-id"]    ).to eq extended_request_id
+                expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+                expect( packet[:"error message"] ).to eq "Specified handle does not exist"
                 expect( packet[:"language tag"]  ).to eq ""
               end
             end
