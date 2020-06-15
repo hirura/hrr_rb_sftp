@@ -19,8 +19,8 @@ module HrrRbSftp
     def self.list_extensions version
       version_class = self.const_get(:"Version#{version}")
       if version_class.const_defined?(:Extension)
-        extension_modules = version_class::Extension.constants.map{|c| version_class::Extension.const_get(c)}.select{|m| m.const_defined?(:EXTENDED_NAME)}
-        extension_modules.map{|m| {:"extension-name" => m::EXTENDED_NAME, :"extension-data" => m::EXTENDED_DATA}}
+        extension_modules = version_class::Extension.constants.map{|c| version_class::Extension.const_get(c)}.select{|m| m.const_defined?(:EXTENSION_NAME)}
+        extension_modules.map{|m| {:"extension-name" => m::EXTENSION_NAME, :"extension-data" => m::EXTENSION_DATA}}
       else
         []
       end

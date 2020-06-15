@@ -3,18 +3,18 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extension::FsyncAtOpensshCom do
     expect( described_class ).to include(HrrRbSftp::Protocol::Common::Extensionable)
   end
 
-  let(:extended_name){ "fsync@openssh.com" }
-  let(:extended_data){ "1" }
+  let(:extension_name){ "fsync@openssh.com" }
+  let(:extension_data){ "1" }
 
-  describe "#{described_class}::EXTENDED_NAME" do
+  describe "#{described_class}::EXTENSION_NAME" do
     it "is defined" do
-      expect(described_class::EXTENDED_NAME).to eq extended_name
+      expect(described_class::EXTENSION_NAME).to eq extension_name
     end
   end
 
-  describe "#{described_class}::EXTENDED_DATA" do
+  describe "#{described_class}::EXTENSION_DATA" do
     it "is defined" do
-      expect(described_class::EXTENDED_DATA).to eq extended_data
+      expect(described_class::EXTENSION_DATA).to eq extension_data
     end
   end
 

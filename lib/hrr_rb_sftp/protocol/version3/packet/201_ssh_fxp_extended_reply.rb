@@ -25,10 +25,15 @@ module HrrRbSftp
           #
           # Represents SSH_FXP_EXTENDED_REPLY packet conditional format.
           #
-          CONDITIONAL_FORMAT = {
-            :"extended-request" => {
-            },
-          }
+          # @example
+          #   {
+          #     :"extended-reply" => {
+          #       "hardlink@openssh.com" => [
+          #       ],
+          #     },
+          #   }
+          #
+          CONDITIONAL_FORMAT = Extension.conditional_reply_format
         end
       end
     end

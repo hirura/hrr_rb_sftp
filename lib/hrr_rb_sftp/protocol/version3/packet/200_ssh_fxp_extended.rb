@@ -29,14 +29,14 @@ module HrrRbSftp
           # @example
           #   {
           #     :"extended-request" => {
-          #                              "hardlink@openssh.com" => [
-          #                                                          [DataType::String, :"oldpath"],
-          #                                                          [DataType::String, :"newpath"],
-          #                                                        ],
-          #                            },
+          #       "hardlink@openssh.com" => [
+          #         [DataType::String, :"oldpath"],
+          #         [DataType::String, :"newpath"],
+          #       ],
+          #     },
           #   }
           #
-          CONDITIONAL_FORMAT = Extension.conditional_format
+          CONDITIONAL_FORMAT = Extension.conditional_request_format
 
           #
           # Responds to SSH_FXP_EXTENDED request.
@@ -47,8 +47,17 @@ module HrrRbSftp
           def respond_to request
             begin
               @extensions ||= (
-                extension_classes = Extension.constants.map{|c| Extension.const_get(c)}.select{|c| c.const_defined?(:EXTENDED_NAME)}
-                extension_classes.inject(Hash.new){|h,c| h.merge(c::EXTENDED_FORMAT.keys.inject(Hash.new){|h,k| h.merge({k => c.new(@handles, logger: logger)})})}
+                extension_classes = Extension.constants.map{|c| Extension.const_get(c)}.select{|c| c.const_defined?(:EXTENSION_NAME)}
+                extensions = Hash.new
+                extension_classes.each do |c|
+                  if extended_requests = c::REQUEST_FORMAT[:"extended-request"]
+                    instance = c.new(@handles, logger: logger)
+                    extended_requests.each_key do |k|
+                      extensions[k] = instance
+                    end
+                  end
+                end
+                extensions
               )
               extended_request = request[:"extended-request"]
               if @extensions.has_key?(extended_request)

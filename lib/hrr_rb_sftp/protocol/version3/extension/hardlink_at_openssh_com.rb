@@ -12,21 +12,23 @@ module HrrRbSftp
           #
           # Represents hardlink@openssh.com version 1 extension name.
           #
-          EXTENDED_NAME = "hardlink@openssh.com"
+          EXTENSION_NAME = "hardlink@openssh.com"
 
           #
           # Represents hardlink@openssh.com version 1 extension data.
           #
-          EXTENDED_DATA = "1"
+          EXTENSION_DATA = "1"
 
           #
           # Represents SSH_FXP_EXTENDED packet additional format for hardlink@openssh.com version 1 extension.
           #
-          EXTENDED_FORMAT = {
-            "hardlink@openssh.com" => [
-                                        [DataType::String, :"oldpath"],
-                                        [DataType::String, :"newpath"],
-                                      ],
+          REQUEST_FORMAT = {
+            :"extended-request" => {
+              "hardlink@openssh.com" => [
+                [DataType::String, :"oldpath"],
+                [DataType::String, :"newpath"],
+              ],
+            },
           }
 
           #

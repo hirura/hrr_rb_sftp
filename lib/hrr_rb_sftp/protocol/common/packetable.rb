@@ -63,7 +63,7 @@ module HrrRbSftp
         def conditional_format packet
           return [] unless self.class.const_defined? :CONDITIONAL_FORMAT
           packet.inject([]){ |a, (field_name, field_value)|
-            a + (self.class::CONDITIONAL_FORMAT.fetch(field_name, {})[field_value] || [])
+            a + ((self.class::CONDITIONAL_FORMAT[field_name] || {})[field_value] || [])
           }
         end
 

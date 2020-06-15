@@ -1,30 +1,43 @@
 RSpec.describe HrrRbSftp::Protocol::Version3::Extension do
   dummy_class_name = :"Dummy"
-  dummy_extended_name = "dummy@dummy.dummy"
-  dummy_extended_format = {
-                            dummy_extended_name => [
-                                                     [String, :"oldpath"],
-                                                     [String, :"newpath"],
-                                                   ],
-                          }
+  dummy_extension_name = "dummy@dummy.dummy"
+  dummy_request_format = {
+    :"extended-request" => {
+      dummy_extension_name => [
+        [String, :"request"],
+      ],
+    },
+  }
+  dummy_reply_format = {
+    :"extended-reply" => {
+      dummy_extension_name => [
+        [String, :"reply"],
+      ],
+    },
+  }
 
   before :all do
     dummy_class = Class.new do |klass|
-      klass::EXTENDED_NAME = dummy_extended_name
-      klass::EXTENDED_FORMAT = dummy_extended_format
+      klass::EXTENSION_NAME = dummy_extension_name
+      klass::REQUEST_FORMAT = dummy_request_format
+      klass::REPLY_FORMAT   = dummy_reply_format
     end
     described_class.send(:const_set, dummy_class_name, dummy_class)
-    described_class.instance_variable_set(:"@conditional_format", nil)
   end
 
   after :all do
     described_class.send(:remove_const, dummy_class_name)
-    described_class.instance_variable_set(:"@conditional_format", nil)
   end
 
-  describe ".conditional_format" do
-    it "returns #{{:"extended-request" => dummy_extended_format}} Hash" do
-      expect( described_class.conditional_format[:"extended-request"] ).to include(dummy_extended_format)
+  describe ".conditional_request_format" do
+    it "includes REQUEST_FORMAT" do
+      expect( described_class.conditional_request_format[:"extended-request"][dummy_extension_name] ).to match_array(dummy_request_format[:"extended-request"][dummy_extension_name])
+    end
+  end
+
+  describe ".conditional_reply_format" do
+    it "includes REPLY_FORMAT" do
+      expect( described_class.conditional_reply_format[:"extended-reply"][dummy_extension_name] ).to match_array(dummy_reply_format[:"extended-reply"][dummy_extension_name])
     end
   end
 end

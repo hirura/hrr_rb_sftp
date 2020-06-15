@@ -12,20 +12,22 @@ module HrrRbSftp
           #
           # Represents fsync@openssh.com version 1 extension name.
           #
-          EXTENDED_NAME = "fsync@openssh.com"
+          EXTENSION_NAME = "fsync@openssh.com"
 
           #
           # Represents fsync@openssh.com version 1 extension data.
           #
-          EXTENDED_DATA = "1"
+          EXTENSION_DATA = "1"
 
           #
           # Represents SSH_FXP_EXTENDED packet additional format for fsync@openssh.com version 1 extension.
           #
-          EXTENDED_FORMAT = {
-            "fsync@openssh.com" => [
-                                     [DataType::String, :"handle"],
-                                   ],
+          REQUEST_FORMAT = {
+            :"extended-request" => {
+              "fsync@openssh.com" => [
+                [DataType::String, :"handle"],
+              ],
+            },
           }
 
           #
