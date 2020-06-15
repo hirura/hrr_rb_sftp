@@ -1,4 +1,8 @@
 RSpec.describe HrrRbSftp::Protocol::Version3::Extension::PosixRenameAtOpensshCom do
+  it "includes Common::Extensionable module" do
+    expect( described_class ).to include(HrrRbSftp::Protocol::Common::Extensionable)
+  end
+
   let(:extended_name){ "posix-rename@openssh.com" }
   let(:extended_data){ "1" }
 
@@ -11,12 +15,6 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extension::PosixRenameAtOpensshCom
   describe "#{described_class}::EXTENDED_DATA" do
     it "is defined" do
       expect(described_class::EXTENDED_DATA).to eq extended_data
-    end
-  end
-
-  describe ".new" do
-    it "takes handles arguments" do
-      expect{ described_class.new({}) }.not_to raise_error
     end
   end
 

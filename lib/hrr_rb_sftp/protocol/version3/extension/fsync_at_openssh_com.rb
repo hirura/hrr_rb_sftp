@@ -7,7 +7,7 @@ module HrrRbSftp
         # This class implements fsync@openssh.com version 1 extension format and responder.
         #
         class FsyncAtOpensshCom
-          include Loggable
+          include Common::Extensionable
 
           #
           # Represents fsync@openssh.com version 1 extension name.
@@ -27,18 +27,6 @@ module HrrRbSftp
                                      [DataType::String, :"handle"],
                                    ],
           }
-
-          #
-          # Returns a new instance of the class.
-          #
-          # @param handles [Hash{String=>File}, Hash{String=>Dir}] A list of opened handles.
-          # @param logger [Logger] Logger.
-          #
-          def initialize handles, logger: nil
-            self.logger = logger
-
-            @handles = handles
-          end
 
           #
           # Responds to SSH_FXP_EXTENDED request with fsync@openssh.com extended-request.

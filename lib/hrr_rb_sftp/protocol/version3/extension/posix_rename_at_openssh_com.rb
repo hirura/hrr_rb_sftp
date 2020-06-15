@@ -7,7 +7,7 @@ module HrrRbSftp
         # This class implements posix-rename@openssh.com version 1 extension format and responder.
         #
         class PosixRenameAtOpensshCom
-          include Loggable
+          include Common::Extensionable
 
           #
           # Represents posix-rename@openssh.com version 1 extension name.
@@ -28,18 +28,6 @@ module HrrRbSftp
                                         [DataType::String, :"newpath"],
                                       ],
           }
-
-          #
-          # Returns a new instance of the class.
-          #
-          # @param handles [Hash{String=>File}, Hash{String=>Dir}] A list of opened handles.
-          # @param logger [Logger] Logger.
-          #
-          def initialize handles, logger: nil
-            self.logger = logger
-
-            @handles = handles
-          end
 
           #
           # Responds to SSH_FXP_EXTENDED request with posix-rename@openssh.com extended-request.
