@@ -18,6 +18,7 @@
 #   - hardlink@openssh.com
 #   - fsync@openssh.com
 #   - posix-rename@openssh.com
+#   - lsetstat@openssh.com
 #
 # @note
 #   - Reversal of SSH_FXP_SYMLINK arguments  

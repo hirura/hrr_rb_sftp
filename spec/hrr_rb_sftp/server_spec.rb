@@ -121,6 +121,7 @@ RSpec.describe HrrRbSftp::Server do
                   {:"extension-name"=>"hardlink@openssh.com",     :"extension-data"=>"1"},
                   {:"extension-name"=>"fsync@openssh.com",        :"extension-data"=>"1"},
                   {:"extension-name"=>"posix-rename@openssh.com", :"extension-data"=>"1"},
+                  {:"extension-name"=>"lsetstat@openssh.com",     :"extension-data"=>"1"},
                 ]
               )
             end
@@ -3386,6 +3387,305 @@ RSpec.describe HrrRbSftp::Server do
               after :example do
                 FileUtils.remove_entry_secure(oldpath)
               end
+
+              it "returns status response" do
+                io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                expect( packet[:"request-id"] ).to eq request_id
+                expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+                expect( packet[:"error message"] ).to start_with "File name too long"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+          end
+
+          context "with lsetstat@openssh.com extended-request" do
+            let(:extended_packet){
+              {
+                :"type"             => version_class::Packet::SSH_FXP_EXTENDED::TYPE,
+                :"request-id"       => request_id,
+                :"extended-request" => extended_request,
+                :"path"             => linkpath,
+                :"attrs"            => newattrs,
+              }
+            }
+            let(:extended_request){ "lsetstat@openssh.com" }
+
+            context "when request is valid" do
+              let(:request_id){ 1 }
+              let(:targetpath){ "targetpath" }
+              let(:linkpath){ "linkpath" }
+
+              before :example do
+                FileUtils.symlink(targetpath, linkpath)
+              end
+
+              after :example do
+                FileUtils.remove_entry_secure(linkpath)
+              end
+
+              context "when attrs does not have size, uid, gid, and permissions" do
+                let(:oldattrs){
+                  stat = File.lstat(linkpath)
+                  attrs = Hash.new
+                  attrs[:"atime"] = stat.atime.to_i if stat.atime && stat.mtime
+                  attrs[:"mtime"] = stat.mtime.to_i if stat.atime && stat.mtime
+                  attrs
+                }
+                let(:newattrs){
+                  attrs = Hash.new
+                  attrs[:"atime"] = 0 if oldattrs.has_key?(:"atime")
+                  attrs[:"mtime"] = 0 if oldattrs.has_key?(:"mtime")
+                  attrs
+                }
+
+                if File.respond_to?(:lutime)
+                  it "returns status response" do
+                    io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                    payload_length = io.remote.out.read(4).unpack("N")[0]
+                    payload = io.remote.out.read(payload_length)
+                    expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    expect( packet[:"request-id"]    ).to eq request_id
+                    expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
+                    expect( packet[:"error message"] ).to eq "Success"
+                    expect( packet[:"language tag"]  ).to eq ""
+                    expect( File.lstat(linkpath).atime.to_i ).to eq newattrs[:"atime"] if newattrs.has_key?(:"atime")
+                    expect( File.lstat(linkpath).mtime.to_i ).to eq newattrs[:"mtime"] if newattrs.has_key?(:"mtime")
+                  end
+                else
+                  it "returns status response" do
+                    io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                    payload_length = io.remote.out.read(4).unpack("N")[0]
+                    payload = io.remote.out.read(payload_length)
+                    expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    expect( packet[:"request-id"]    ).to eq request_id
+                    expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+                    expect( packet[:"error message"] ).to eq "File.lutime is not supported on this Ruby version"
+                    expect( packet[:"language tag"]  ).to eq ""
+                    expect( File.lstat(linkpath).atime.to_i ).to eq oldattrs[:"atime"] if oldattrs.has_key?(:"atime")
+                    expect( File.lstat(linkpath).mtime.to_i ).to eq oldattrs[:"mtime"] if oldattrs.has_key?(:"mtime")
+                  end
+                end
+              end
+
+              context "when attrs does not have size, uid, and gid" do
+                let(:oldattrs){
+                  stat = File.lstat(linkpath)
+                  attrs = Hash.new
+                  attrs[:"permissions"] = stat.mode       if stat.mode
+                  attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+                  attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+                  attrs
+                }
+                let(:newattrs){
+                  attrs = Hash.new
+                  attrs[:"permissions"] = 0120000 if oldattrs.has_key?(:"permissions")
+                  attrs[:"atime"]       =       0 if oldattrs.has_key?(:"atime")
+                  attrs[:"mtime"]       =       0 if oldattrs.has_key?(:"mtime")
+                  attrs
+                }
+
+                before :example do
+                  FileUtils.symlink(targetpath + "_", linkpath + "_")
+                end
+
+                after :example do
+                  FileUtils.remove_entry_secure(linkpath + "_")
+                end
+
+                if File.respond_to?(:lutime)
+                  it "returns status response" do
+                    io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                    payload_length = io.remote.out.read(4).unpack("N")[0]
+                    payload = io.remote.out.read(payload_length)
+                    expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    expect( packet[:"request-id"]    ).to eq request_id
+                    if newattrs.has_key?(:"permissions") && (File.lchmod(newattrs[:"permissions"], linkpath + "_") rescue nil).nil?
+                      expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+                      expect( packet[:"error message"] ).to eq "lchmod() function is unimplemented on this machine"
+                      expect( packet[:"language tag"]  ).to eq ""
+                      expect( File.lstat(linkpath).atime.to_i ).to eq newattrs[:"atime"]       if newattrs.has_key?(:"atime")
+                      expect( File.lstat(linkpath).mtime.to_i ).to eq newattrs[:"mtime"]       if newattrs.has_key?(:"mtime")
+                      expect( File.lstat(linkpath).mode       ).to eq oldattrs[:"permissions"] if oldattrs.has_key?(:"permissions")
+                    else
+                      expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
+                      expect( packet[:"error message"] ).to eq "Success"
+                      expect( packet[:"language tag"]  ).to eq ""
+                      expect( File.lstat(linkpath).atime.to_i ).to eq newattrs[:"atime"]       if newattrs.has_key?(:"atime")
+                      expect( File.lstat(linkpath).mtime.to_i ).to eq newattrs[:"mtime"]       if newattrs.has_key?(:"mtime")
+                      expect( File.lstat(linkpath).mode       ).to eq newattrs[:"permissions"] if newattrs.has_key?(:"permissions")
+                    end
+                  end
+                else
+                  it "returns status response" do
+                    io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                    payload_length = io.remote.out.read(4).unpack("N")[0]
+                    payload = io.remote.out.read(payload_length)
+                    expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    expect( packet[:"request-id"]    ).to eq request_id
+                    expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+                    expect( packet[:"error message"] ).to eq "File.lutime is not supported on this Ruby version"
+                    expect( packet[:"language tag"]  ).to eq ""
+                    expect( File.lstat(linkpath).atime.to_i ).to eq oldattrs[:"atime"]       if oldattrs.has_key?(:"atime")
+                    expect( File.lstat(linkpath).mtime.to_i ).to eq oldattrs[:"mtime"]       if oldattrs.has_key?(:"mtime")
+                    expect( File.lstat(linkpath).mode       ).to eq oldattrs[:"permissions"] if oldattrs.has_key?(:"permissions")
+                  end
+                end
+              end
+
+              context "when attrs does not have size" do
+                let(:oldattrs){
+                  stat = File.lstat(linkpath)
+                  attrs = Hash.new
+                  attrs[:"uid"]         = stat.uid        if stat.uid
+                  attrs[:"gid"]         = stat.gid        if stat.gid
+                  attrs[:"permissions"] = stat.mode       if stat.mode
+                  attrs[:"atime"]       = stat.atime.to_i if stat.atime && stat.mtime
+                  attrs[:"mtime"]       = stat.mtime.to_i if stat.atime && stat.mtime
+                  attrs
+                }
+                let(:newattrs){
+                  attrs = Hash.new
+                  attrs[:"uid"]         =       0 if oldattrs.has_key?(:"uid")
+                  attrs[:"gid"]         =       0 if oldattrs.has_key?(:"gid")
+                  attrs[:"permissions"] = 0120000 if oldattrs.has_key?(:"permissions")
+                  attrs[:"atime"]       =       0 if oldattrs.has_key?(:"atime")
+                  attrs[:"mtime"]       =       0 if oldattrs.has_key?(:"mtime")
+                  attrs
+                }
+
+                if File.respond_to?(:lutime)
+                  it "returns status response" do
+                    io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                    payload_length = io.remote.out.read(4).unpack("N")[0]
+                    payload = io.remote.out.read(payload_length)
+                    expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    expect( packet[:"request-id"]    ).to eq request_id
+                    expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
+                    expect( packet[:"error message"] ).to eq "Permission denied"
+                    expect( packet[:"language tag"]  ).to eq ""
+                    expect( File.lstat(linkpath).atime.to_i ).to eq newattrs[:"atime"]       if newattrs.has_key?(:"atime")
+                    expect( File.lstat(linkpath).mtime.to_i ).to eq newattrs[:"mtime"]       if newattrs.has_key?(:"mtime")
+                    expect( File.lstat(linkpath).uid        ).to eq oldattrs[:"uid"]         if oldattrs.has_key?(:"uid")
+                    expect( File.lstat(linkpath).gid        ).to eq oldattrs[:"gid"]         if oldattrs.has_key?(:"gid")
+                    expect( File.lstat(linkpath).mode       ).to eq oldattrs[:"permissions"] if oldattrs.has_key?(:"permissions")
+                  end
+                else
+                  it "returns status response" do
+                    io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                    payload_length = io.remote.out.read(4).unpack("N")[0]
+                    payload = io.remote.out.read(payload_length)
+                    expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    expect( packet[:"request-id"]    ).to eq request_id
+                    expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
+                    expect( packet[:"error message"] ).to eq "File.lutime is not supported on this Ruby version"
+                    expect( packet[:"language tag"]  ).to eq ""
+                    expect( File.lstat(linkpath).atime.to_i ).to eq oldattrs[:"atime"]       if oldattrs.has_key?(:"atime")
+                    expect( File.lstat(linkpath).mtime.to_i ).to eq oldattrs[:"mtime"]       if oldattrs.has_key?(:"mtime")
+                    expect( File.lstat(linkpath).uid        ).to eq oldattrs[:"uid"]         if oldattrs.has_key?(:"uid")
+                    expect( File.lstat(linkpath).gid        ).to eq oldattrs[:"gid"]         if oldattrs.has_key?(:"gid")
+                    expect( File.lstat(linkpath).mode       ).to eq oldattrs[:"permissions"] if oldattrs.has_key?(:"permissions")
+                  end
+                end
+              end
+            end
+
+            context "when attrs has size" do
+              let(:request_id){ 1 }
+              let(:linkpath){ "linkpath" }
+              let(:newattrs){
+                attrs = Hash.new
+                attrs[:"size"] = 100
+                attrs
+              }
+
+              it "returns status response" do
+                io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                expect( packet[:"request-id"] ).to eq request_id
+                expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
+                expect( packet[:"error message"] ).to eq "Bad message"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+
+            context "when request linkpath does not exist" do
+              let(:request_id){ 1 }
+              let(:linkpath){ "does/not/exist" }
+              let(:newattrs){
+                attrs = Hash.new
+                attrs[:"uid"] = 0
+                attrs[:"gid"] = 0
+                attrs
+              }
+
+              it "returns status response" do
+                io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                expect( packet[:"request-id"] ).to eq request_id
+                expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
+                expect( packet[:"error message"] ).to eq "No such file or directory"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+
+            context "when request linkpath is not accessible" do
+              let(:request_id){ 1 }
+              let(:linkpath){ "dir000/linkpath" }
+              let(:newattrs){
+                attrs = Hash.new
+                attrs[:"uid"] = 0
+                attrs[:"gid"] = 0
+                attrs
+              }
+
+              before :example do
+                Dir.mkdir(File.dirname(linkpath))
+                FileUtils.chmod(0000, File.dirname(linkpath))
+              end
+
+              after :example do
+                FileUtils.chmod(0755, File.dirname(linkpath))
+                FileUtils.remove_entry_secure(File.dirname(linkpath))
+              end
+
+              it "returns status response" do
+                io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
+                payload_length = io.remote.out.read(4).unpack("N")[0]
+                payload = io.remote.out.read(payload_length)
+                expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
+                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                expect( packet[:"request-id"] ).to eq request_id
+                expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
+                expect( packet[:"error message"] ).to eq "Permission denied"
+                expect( packet[:"language tag"]  ).to eq ""
+              end
+            end
+
+            context "when request linkpath causes other error" do
+              let(:request_id){ 1 }
+              let(:linkpath){ ("a".."z").to_a.join * 10 }
+              let(:newattrs){
+                attrs = Hash.new
+                attrs[:"uid"] = 0
+                attrs[:"gid"] = 0
+                attrs
+              }
 
               it "returns status response" do
                 io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)

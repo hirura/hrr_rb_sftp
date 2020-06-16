@@ -136,6 +136,7 @@ The followins extensions are supported.
 - hardlink@openssh.com version 1
 - fsync@openssh.com version 1
 - posix-rename@openssh.com version 1
+- lsetstat@openssh.com version 1
 
 ## Development
 

@@ -42,3 +42,4 @@ end
 require "hrr_rb_sftp/protocol/version3/extension/hardlink_at_openssh_com"
 require "hrr_rb_sftp/protocol/version3/extension/fsync_at_openssh_com"
 require "hrr_rb_sftp/protocol/version3/extension/posix_rename_at_openssh_com"
+require "hrr_rb_sftp/protocol/version3/extension/lsetstat_at_openssh_com"
