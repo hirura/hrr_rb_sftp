@@ -3490,14 +3490,6 @@ RSpec.describe HrrRbSftp::Server do
                   attrs
                 }
 
-                before :example do
-                  FileUtils.symlink(targetpath + "_", linkpath + "_")
-                end
-
-                after :example do
-                  FileUtils.remove_entry_secure(linkpath + "_")
-                end
-
                 if File.respond_to?(:lutime)
                   it "returns status response" do
                     io.remote.in.write ([extended_payload.bytesize].pack("N") + extended_payload)
@@ -3506,7 +3498,7 @@ RSpec.describe HrrRbSftp::Server do
                     expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
                     packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
                     expect( packet[:"request-id"]    ).to eq request_id
-                    if newattrs.has_key?(:"permissions") && (File.lchmod(newattrs[:"permissions"], linkpath + "_") rescue nil).nil?
+                    if newattrs.has_key?(:"permissions") && ! File.respond_to?(:lchmod)
                       expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                       expect( packet[:"error message"] ).to eq "lchmod() function is unimplemented on this machine"
                       expect( packet[:"language tag"]  ).to eq ""
