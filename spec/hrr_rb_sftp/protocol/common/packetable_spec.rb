@@ -152,4 +152,39 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packetable do
       end
     end
   end
+
+  context "when mixed-in class has CONDITIONAL_FORMAT that requires complementary packet" do
+    let(:mixed_in){
+      Class.new do |klass|
+        include HrrRbSftp::Protocol::Common::Packetable
+        klass::TYPE = 255
+        klass::FORMAT = [
+          [HrrRbSftp::Protocol::Common::DataType::Byte,   :"type"],
+          [HrrRbSftp::Protocol::Common::DataType::Uint32, :"request-id"],
+        ]
+        klass::HIDDEN_FORMAT = [
+          [HrrRbSftp::Protocol::Common::DataType::String, :"hidden data"],
+        ]
+        klass::CONDITIONAL_FORMAT = {
+          :"require hidden" => {
+            true => klass::HIDDEN_FORMAT,
+          },
+        }
+      end
+    }
+
+    describe ".new" do
+      it "does not take arguments" do
+        expect{ mixed_in.new({}) }.not_to raise_error
+      end
+    end
+
+    describe "#decode" do
+      packet = {:"type" => 255, :"request-id" => 123}
+
+      it "decodes \"FF 00 00 00 7B 00 00 00 0B c o n d i t i o n a l\" with complementary message #{{:"require hidden" => true}.inspect} to #{{:"type" => 255, :"request-id" => 123, :"hidden data" => "conditional"}.inspect}" do
+        expect( mixed_in.new({}).decode( ["FF", "0000007B", "0000000B", "conditional"].pack("H*H*H*a*"), {:"require hidden" => true} ) ).to eq( {:"type" => 255, :"request-id" => 123, :"hidden data" => "conditional"} )
+      end
+    end
+  end
 end

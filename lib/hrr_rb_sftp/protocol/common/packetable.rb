@@ -44,12 +44,16 @@ module HrrRbSftp
         # Decodes payload represented in binary string into packet represented in Hash.
         #
         # @param payload [String] Payload of binary string.
+        # @param complementary_packet [Hash{Symbol=>Object}] Implied fields that activate conditional format. Now this is used for debug purpose.
         # @return [String] Decoded packet represented in Hash that key and value are field name and field value.
         #
-        def decode payload
+        def decode payload, complementary_packet={}
           payload_io = StringIO.new payload
           format = common_format
           decoded_packet = decode_recursively(payload_io).inject(Hash.new){ |h, (k, v)| h.update({k => v}) }
+          if complementary_packet.any?
+            decoded_packet.merge! decode_recursively(payload_io, complementary_packet.to_a).inject(Hash.new){ |h, (k, v)| h.update({k => v}) }
+          end
           log_debug { 'decoded packet: ' + decoded_packet.inspect }
           decoded_packet
         end
