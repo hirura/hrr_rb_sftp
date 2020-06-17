@@ -131,7 +131,7 @@ Where, the /path/to/hrr_rb_sftp_server.rb code is the same as shown above.
 
 ## Supported extensions
 
-The followins extensions are supported.
+The following extensions are supported.
 
 - hardlink@openssh.com version 1
 - fsync@openssh.com version 1
