@@ -39,16 +39,16 @@ module HrrRbSftp
                 File.truncate(path, attrs[:"size"])
               end
               if attrs.has_key?(:"permissions")
-                log_debug { "FileUtils.chmod(#{attrs[:"permissions"].inspect}, #{path.inspect})" }
-                FileUtils.chmod(attrs[:"permissions"], path)
+                log_debug { "File.chmod(#{attrs[:"permissions"].inspect}, #{path.inspect})" }
+                File.chmod(attrs[:"permissions"], path)
               end
               if attrs.has_key?(:"atime") && attrs.has_key?(:"mtime")
                 log_debug { "File.utime(#{attrs[:"atime"].inspect}, #{attrs[:"mtime"].inspect}, #{path.inspect})" }
                 File.utime(attrs[:"atime"], attrs[:"mtime"], path)
               end
               if attrs.has_key?(:"uid") && attrs.has_key?(:"gid")
-                log_debug { "FileUtils.chown(#{attrs[:"uid"].inspect}, #{attrs[:"gid"].inspect}, #{path.inspect})" }
-                FileUtils.chown(attrs[:"uid"], attrs[:"gid"], path)
+                log_debug { "File.chown(#{attrs[:"uid"].inspect}, #{attrs[:"gid"].inspect}, #{path.inspect})" }
+                File.chown(attrs[:"uid"], attrs[:"gid"], path)
               end
               {
                 :"type"          => SSH_FXP_STATUS::TYPE,
