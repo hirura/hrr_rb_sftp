@@ -11,6 +11,78 @@ RSpec.describe HrrRbSftp::Protocol::Version1::Packet::SSH_FXP_STATUS do
     end
   end
 
+  describe "#{described_class}::SSH_FX_OK" do
+    let(:value){ 0 }
+
+    it "is defined" do
+      expect(described_class::SSH_FX_OK).to eq value
+    end
+  end
+
+  describe "#{described_class}::SSH_FX_EOF" do
+    let(:value){ 1 }
+
+    it "is defined" do
+      expect(described_class::SSH_FX_EOF).to eq value
+    end
+  end
+
+  describe "#{described_class}::SSH_FX_NO_SUCH_FILE" do
+    let(:value){ 2 }
+
+    it "is defined" do
+      expect(described_class::SSH_FX_NO_SUCH_FILE).to eq value
+    end
+  end
+
+  describe "#{described_class}::SSH_FX_PERMISSION_DENIED" do
+    let(:value){ 3 }
+
+    it "is defined" do
+      expect(described_class::SSH_FX_PERMISSION_DENIED).to eq value
+    end
+  end
+
+  describe "#{described_class}::SSH_FX_FAILURE" do
+    let(:value){ 4 }
+
+    it "is defined" do
+      expect(described_class::SSH_FX_FAILURE).to eq value
+    end
+  end
+
+  describe "#{described_class}::SSH_FX_BAD_MESSAGE" do
+    let(:value){ 5 }
+
+    it "is defined" do
+      expect(described_class::SSH_FX_BAD_MESSAGE).to eq value
+    end
+  end
+
+  describe "#{described_class}::SSH_FX_NO_CONNECTION" do
+    let(:value){ 6 }
+
+    it "is defined" do
+      expect(described_class::SSH_FX_NO_CONNECTION).to eq value
+    end
+  end
+
+  describe "#{described_class}::SSH_FX_CONNECTION_LOST" do
+    let(:value){ 7 }
+
+    it "is defined" do
+      expect(described_class::SSH_FX_CONNECTION_LOST).to eq value
+    end
+  end
+
+  describe "#{described_class}::SSH_FX_OP_UNSUPPORTED" do
+    let(:value){ 8 }
+
+    it "is defined" do
+      expect(described_class::SSH_FX_OP_UNSUPPORTED).to eq value
+    end
+  end
+
   let(:packet){
     {
       :"type"       => type,
