@@ -19,6 +19,15 @@ module HrrRbSftp
 
           @handles = handles
         end
+
+        #
+        # Returns opened handles.
+        #
+        # @return [Hash{String=>File, Dir}] Opened handles.
+        #
+        def handles
+          @handles
+        end
       end
     end
   end

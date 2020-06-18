@@ -75,8 +75,8 @@ module HrrRbSftp
               file = ::File.open(*args)
               log_debug { "handle = #{file.object_id.to_s(16).inspect}" }
               handle = file.object_id.to_s(16)
-              log_debug { "@handles[#{handle.inspect}] = file" }
-              @handles[handle] = file
+              log_debug { "handles[#{handle.inspect}] = file" }
+              handles[handle] = file
               {
                 :"type"       => SSH_FXP_HANDLE::TYPE,
                 :"request-id" => request[:"request-id"],

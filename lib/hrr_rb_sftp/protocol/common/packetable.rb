@@ -21,6 +21,15 @@ module HrrRbSftp
         end
 
         #
+        # Returns opened handles.
+        #
+        # @return [Hash{String=>File, Dir}] Opened handles.
+        #
+        def handles
+          @handles
+        end
+
+        #
         # Encodes packet represented in Hash into payload represented in binary string.
         #
         # @param packet [Hash{Symbol=>Object}] Packet represented in Hash that key and value are field name and field value.

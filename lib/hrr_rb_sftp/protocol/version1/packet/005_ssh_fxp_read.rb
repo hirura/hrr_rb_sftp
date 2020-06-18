@@ -33,9 +33,9 @@ module HrrRbSftp
           #
           def respond_to request
             begin
-              raise "Specified handle does not exist" unless @handles.has_key?(request[:"handle"])
-              log_debug { "file = @handles[#{request[:"handle"].inspect}]" }
-              file = @handles[request[:"handle"]]
+              raise "Specified handle does not exist" unless handles.has_key?(request[:"handle"])
+              log_debug { "file = handles[#{request[:"handle"].inspect}]" }
+              file = handles[request[:"handle"]]
               log_debug { "file.pos = #{request[:"offset"].inspect}" }
               file.pos = request[:"offset"]
               unless file.eof?

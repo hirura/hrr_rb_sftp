@@ -31,9 +31,9 @@ module HrrRbSftp
           #
           def respond_to request
             begin
-              raise "Specified handle does not exist" unless @handles.has_key?(request[:"handle"])
-              log_debug { "dir = @handles[#{request[:"handle"].inspect}]" }
-              dir = @handles[request[:"handle"]]
+              raise "Specified handle does not exist" unless handles.has_key?(request[:"handle"])
+              log_debug { "dir = handles[#{request[:"handle"].inspect}]" }
+              dir = handles[request[:"handle"]]
               raise "Specified handle is not directory" unless dir.instance_of?(::Dir)
               entries = ::Array.new
               while entry = dir.read

@@ -35,8 +35,8 @@ module HrrRbSftp
               dir = ::Dir.open(request[:"path"])
               log_debug { "handle = #{dir.object_id.to_s(16).inspect}" }
               handle = dir.object_id.to_s(16)
-              log_debug { "@handles[#{handle.inspect}] = dir" }
-              @handles[handle] = dir
+              log_debug { "handles[#{handle.inspect}] = dir" }
+              handles[handle] = dir
               {
                 :"type"       => SSH_FXP_HANDLE::TYPE,
                 :"request-id" => request[:"request-id"],
