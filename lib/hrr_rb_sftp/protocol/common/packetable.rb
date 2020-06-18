@@ -11,7 +11,7 @@ module HrrRbSftp
         #
         # Returns a new instance of a class that includes this module.
         #
-        # @param handles [Hash{String=>File}, Hash{String=>Dir}] A list of opened handles.
+        # @param handles [Hash{String=>File, Dir}] Opened handles.
         # @param logger [Logger] Logger.
         #
         def initialize handles, logger: nil
