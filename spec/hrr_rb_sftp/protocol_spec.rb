@@ -24,13 +24,13 @@ RSpec.describe HrrRbSftp::Protocol do
     let(:handle){ double("handle") }
 
     before :example do
-      protocol.instance_variable_get(:"@handles")["key"] = handle
+      protocol.instance_variable_get(:"@context")[:handles]["key"] = handle
     end
 
     it "closes handles" do
       expect( handle ).to receive(:close).with(no_args).once
       protocol.close_handles
-      expect( protocol.instance_variable_get(:"@handles") ).to eq ({})
+      expect( protocol.instance_variable_get(:"@context")[:handles] ).to eq ({})
     end
   end
 end

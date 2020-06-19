@@ -32,11 +32,12 @@ module HrrRbSftp
     def initialize version, logger: nil
       self.logger = logger
 
-      @handles = Hash.new
       @version = version
       @version_class = self.class.const_get(:"Version#{@version}")
+      @context = Hash.new
+      @context[:handles] = Hash.new
       packet_classes = @version_class::Packet.constants.select{|c| c.to_s.start_with?("SSH_FXP_")}.map{|c| @version_class::Packet.const_get(c)}
-      @packets = packet_classes.map{|pkt| [pkt::TYPE, pkt.new(@handles, logger: logger)]}.inject(Hash.new){|h,(k,v)| h.update({k => v})}
+      @packets = packet_classes.map{|pkt| [pkt::TYPE, pkt.new(@context, logger: logger)]}.inject(Hash.new){|h,(k,v)| h.update({k => v})}
     end
 
     #
@@ -81,10 +82,10 @@ module HrrRbSftp
     #
     def close_handles
       log_info { "closing handles" }
-      @handles.each do |k, v|
+      @context[:handles].each do |k, v|
         v.close rescue nil
       end
-      @handles.clear
+      @context[:handles].clear
       log_info { "handles closed" }
     end
   end
