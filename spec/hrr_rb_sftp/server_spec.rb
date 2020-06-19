@@ -104,6 +104,7 @@ RSpec.describe HrrRbSftp::Server do
       [1, 2, 3].each do |version|
         context "when remote protocol version is #{version}" do
           let(:version){ version }
+          let(:version_class){ HrrRbSftp::Protocol.const_get(:"Version#{version}") }
 
           let(:pkt_args){
             if version < 3
@@ -112,7 +113,7 @@ RSpec.describe HrrRbSftp::Server do
               ]
             else
               [
-                {},
+                {:extension => version_class::Extension},
               ]
             end
           }
@@ -162,6 +163,7 @@ RSpec.describe HrrRbSftp::Server do
     [1, 2, 3].each do |version|
       context "when remote protocol version is #{version}" do
         let(:version){ version }
+        let(:version_class){ HrrRbSftp::Protocol.const_get(:"Version#{version}") }
 
         let(:pkt_args){
           if version < 3
@@ -170,7 +172,7 @@ RSpec.describe HrrRbSftp::Server do
             ]
           else
             [
-              {},
+              {:extension => version_class::Extension},
             ]
           end
         }
@@ -265,7 +267,7 @@ RSpec.describe HrrRbSftp::Server do
             ]
           else
             [
-              {},
+              {:extension => version_class::Extension},
             ]
           end
         }

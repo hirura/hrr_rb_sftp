@@ -24,7 +24,7 @@ module HrrRbSftp
           ]
 
           #
-          # Represents SSH_FXP_EXTENDED packet conditional format.
+          # Private method #conditional_format is used instead.
           #
           # @example
           #   {
@@ -36,7 +36,8 @@ module HrrRbSftp
           #     },
           #   }
           #
-          CONDITIONAL_FORMAT = Extension.conditional_request_format
+          #
+          CONDITIONAL_FORMAT = nil
 
           #
           # Responds to SSH_FXP_EXTENDED request.
@@ -47,7 +48,7 @@ module HrrRbSftp
           def respond_to request
             begin
               @extensions ||= (
-                extension_classes = Extension.constants.map{|c| Extension.const_get(c)}.select{|c| c.const_defined?(:EXTENSION_NAME)}
+                extension_classes = extension.constants.map{|c| extension.const_get(c)}.select{|c| c.const_defined?(:EXTENSION_NAME)}
                 extensions = Hash.new
                 extension_classes.each do |c|
                   if extended_requests = c::REQUEST_FORMAT[:"extended-request"]
@@ -81,6 +82,17 @@ module HrrRbSftp
                 :"language tag"  => "",
               }
             end
+          end
+
+          private
+
+          #
+          # Overrides Common::Packetable#conditional_format private method and represents SSH_FXP_EXTENDED packet conditional format.
+          #
+          def conditional_format packet
+            packet.inject([]){ |a, (field_name, field_value)|
+              a + ((extension.conditional_request_format[field_name] || {})[field_value] || [])
+            }
           end
         end
       end

@@ -13,7 +13,7 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_READLINK do
 
   let(:pkt_args){
     [
-      {},
+      {:extension => HrrRbSftp::Protocol::Version3::Extension},
     ]
   }
 

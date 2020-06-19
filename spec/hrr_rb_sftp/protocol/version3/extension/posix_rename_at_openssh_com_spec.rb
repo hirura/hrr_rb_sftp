@@ -20,7 +20,7 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extension::PosixRenameAtOpensshCom
 
   let(:pkt_args){
     [
-      {},
+      {:extension => HrrRbSftp::Protocol::Version3::Extension},
     ]
   }
 

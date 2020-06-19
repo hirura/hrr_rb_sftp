@@ -23,7 +23,7 @@ module HrrRbSftp
           ]
 
           #
-          # Represents SSH_FXP_EXTENDED_REPLY packet conditional format.
+          # Private method #conditional_format is used instead.
           #
           # @example
           #   {
@@ -33,7 +33,18 @@ module HrrRbSftp
           #     },
           #   }
           #
-          CONDITIONAL_FORMAT = Extension.conditional_reply_format
+          CONDITIONAL_FORMAT = nil
+
+          private
+
+          #
+          # Overrides Common::Packetable#conditional_format private method and represents SSH_FXP_EXTENDED_REPLY packet conditional format.
+          #
+          def conditional_format packet
+            packet.inject([]){ |a, (field_name, field_value)|
+              a + ((extension.conditional_reply_format[field_name] || {})[field_value] || [])
+            }
+          end
         end
       end
     end
