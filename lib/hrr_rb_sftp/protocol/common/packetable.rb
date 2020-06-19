@@ -23,6 +23,17 @@ module HrrRbSftp
         end
 
         #
+        # Returns contextual variables.
+        #
+        # @return [Hash] Contextual variables.
+        #   - :handles (Hash\\{String=>File, Dir\}) - Opened handles.
+        #   - :extension (Class) - Extension class.
+        #
+        def context
+          @context
+        end
+
+        #
         # Returns opened handles.
         #
         # @return [Hash{String=>File, Dir}] Opened handles.

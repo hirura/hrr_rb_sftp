@@ -52,7 +52,7 @@ module HrrRbSftp
                 extensions = Hash.new
                 extension_classes.each do |c|
                   if extended_requests = c::REQUEST_FORMAT[:"extended-request"]
-                    instance = c.new(handles, logger: logger)
+                    instance = c.new(context, logger: logger)
                     extended_requests.each_key do |k|
                       extensions[k] = instance
                     end
