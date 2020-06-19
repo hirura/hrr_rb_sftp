@@ -54,7 +54,7 @@ module HrrRbSftp
         #
         # Encodes packet represented in Hash into payload represented in binary string.
         #
-        # @param packet [Hash{Symbol=>Object}] Packet represented in Hash that key and value are field name and field value.
+        # @param packet [Hash{Symbol=>Object}] Packets represented in Hash that key and value are field name and field value.
         # @return [String] Encoded payload converted from packet.
         #
         def encode packet

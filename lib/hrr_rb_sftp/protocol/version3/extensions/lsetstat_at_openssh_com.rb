@@ -56,63 +56,63 @@ module HrrRbSftp
                 File.lchmod(attrs[:"permissions"], path)
               end
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_OK,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_OK,
                 :"error message" => "Success",
                 :"language tag"  => "",
               }
             rescue BadMessageError => e
               log_debug { e.message }
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE,
                 :"error message" => "Bad message",
                 :"language tag"  => "",
               }
             rescue FileLutimeUnsupportedError => e
               log_debug { e.message }
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_FAILURE,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_FAILURE,
                 :"error message" => e.message,
                 :"language tag"  => "",
               }
             rescue Errno::ENOENT => e
               log_debug { e.message }
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE,
                 :"error message" => "No such file or directory",
                 :"language tag"  => "",
               }
             rescue Errno::EACCES, Errno::EPERM => e
               log_debug { e.message }
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED,
                 :"error message" => "Permission denied",
                 :"language tag"  => "",
               }
             rescue NotImplementedError => e
               log_debug { e.message }
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_FAILURE,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_FAILURE,
                 :"error message" => e.message,
                 :"language tag"  => "",
               }
             rescue => e
               log_error { [e.backtrace[0], ": ", e.message, " (", e.class.to_s, ")\n\t", e.backtrace[1..-1].join("\n\t")].join }
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_FAILURE,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_FAILURE,
                 :"error message" => e.message,
                 :"language tag"  => "",
               }

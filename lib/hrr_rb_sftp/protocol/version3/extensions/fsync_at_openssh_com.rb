@@ -44,9 +44,9 @@ module HrrRbSftp
               log_debug { "file.fsync" }
               file.fsync
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_OK,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_OK,
                 :"error message" => "Success",
                 :"language tag"  => "",
               }

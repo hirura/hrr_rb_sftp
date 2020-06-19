@@ -1,2 +1,2 @@
-RSpec.describe HrrRbSftp::Protocol::Version1::Packet do
+RSpec.describe HrrRbSftp::Protocol::Version1::Packets do
 end

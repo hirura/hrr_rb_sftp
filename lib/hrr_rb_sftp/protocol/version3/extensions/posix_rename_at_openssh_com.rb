@@ -44,27 +44,27 @@ module HrrRbSftp
               log_debug { "File.rename(#{oldpath.inspect}, #{newpath.inspect})" }
               File.rename(oldpath, newpath)
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_OK,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_OK,
                 :"error message" => "Success",
                 :"language tag"  => "",
               }
             rescue Errno::ENOENT => e
               log_debug { e.message }
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE,
                 :"error message" => "No such file or directory",
                 :"language tag"  => "",
               }
             rescue Errno::EACCES => e
               log_debug { e.message }
               {
-                :"type"          => Packet::SSH_FXP_STATUS::TYPE,
+                :"type"          => Packets::SSH_FXP_STATUS::TYPE,
                 :"request-id"    => request[:"request-id"],
-                :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED,
+                :"code"          => Packets::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED,
                 :"error message" => "Permission denied",
                 :"language tag"  => "",
               }

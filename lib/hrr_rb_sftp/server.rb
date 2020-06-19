@@ -88,7 +88,7 @@ module HrrRbSftp
         raise "Failed receiving SSH_FXP_INIT"
       end
 
-      packet = Protocol::Common::Packet::SSH_FXP_INIT.new({}, logger: logger).decode payload
+      packet = Protocol::Common::Packets::SSH_FXP_INIT.new({}, logger: logger).decode payload
       packet[:"version"]
     end
 
@@ -96,11 +96,11 @@ module HrrRbSftp
       log_debug { "start send_fxp_version" }
 
       packet = {
-        :"type"       => Protocol::Common::Packet::SSH_FXP_VERSION::TYPE,
+        :"type"       => Protocol::Common::Packets::SSH_FXP_VERSION::TYPE,
         :"version"    => version,
         :"extensions" => extensions,
       }
-      payload = Protocol::Common::Packet::SSH_FXP_VERSION.new({}, logger: logger).encode packet
+      payload = Protocol::Common::Packets::SSH_FXP_VERSION.new({}, logger: logger).encode packet
       @sender.send payload
     end
 

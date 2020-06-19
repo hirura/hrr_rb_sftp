@@ -1,6 +1,6 @@
-RSpec.describe HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_STATUS do
-  it "inherits Version1::Packet::SSH_FXP_STATUS class" do
-    expect( described_class ).to be < HrrRbSftp::Protocol::Version1::Packet::SSH_FXP_STATUS
+RSpec.describe HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_STATUS do
+  it "inherits Version1::Packets::SSH_FXP_STATUS class" do
+    expect( described_class ).to be < HrrRbSftp::Protocol::Version1::Packets::SSH_FXP_STATUS
   end
 
   let(:type){ 101 }

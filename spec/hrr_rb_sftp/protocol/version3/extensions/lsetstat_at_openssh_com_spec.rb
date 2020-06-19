@@ -27,7 +27,7 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extensions::LsetstatAtOpensshCom d
 
   let(:packet){
     {
-      :"type"             => HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_EXTENDED::TYPE,
+      :"type"             => HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_EXTENDED::TYPE,
       :"request-id"       => 1,
       :"extended-request" => "lsetstat@openssh.com",
       :"path"             => "path",
@@ -46,13 +46,13 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extensions::LsetstatAtOpensshCom d
 
   describe "#encode" do
     it "returns payload encoded" do
-      expect(HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_EXTENDED.new(*pkt_args).encode(packet)).to eq payload
+      expect(HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_EXTENDED.new(*pkt_args).encode(packet)).to eq payload
     end
   end
 
   describe "#decode" do
     it "returns packet decoded" do
-      expect(HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_EXTENDED.new(*pkt_args).decode(payload)).to eq packet
+      expect(HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_EXTENDED.new(*pkt_args).decode(payload)).to eq packet
     end
   end
 end

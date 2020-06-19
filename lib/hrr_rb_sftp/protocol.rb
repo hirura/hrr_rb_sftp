@@ -36,7 +36,7 @@ module HrrRbSftp
       @context = Hash.new
       @context[:handles] = Hash.new
       @context[:extensions] = @version_class::Extensions.new(@context, logger: logger) if @version_class.const_defined?(:Extensions)
-      packet_classes = @version_class::Packet.constants.select{|c| c.to_s.start_with?("SSH_FXP_")}.map{|c| @version_class::Packet.const_get(c)}
+      packet_classes = @version_class::Packets.constants.select{|c| c.to_s.start_with?("SSH_FXP_")}.map{|c| @version_class::Packets.const_get(c)}
       @packets = packet_classes.map{|pkt| [pkt::TYPE, pkt.new(@context, logger: logger)]}.inject(Hash.new){|h,(k,v)| h.update({k => v})}
     end
 
@@ -55,9 +55,9 @@ module HrrRbSftp
                             request_packet = @packets[request_type].decode request_payload
                           rescue => e
                             {
-                              :"type"          => @version_class::Packet::SSH_FXP_STATUS::TYPE,
+                              :"type"          => @version_class::Packets::SSH_FXP_STATUS::TYPE,
                               :"request-id"    => (request_payload[1,4].unpack("N")[0] || 0),
-                              :"code"          => @version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE,
+                              :"code"          => @version_class::Packets::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE,
                               :"error message" => e.message,
                               :"language tag"  => "",
                             }
@@ -66,9 +66,9 @@ module HrrRbSftp
                           end
                         else
                           {
-                            :"type"          => @version_class::Packet::SSH_FXP_STATUS::TYPE,
+                            :"type"          => @version_class::Packets::SSH_FXP_STATUS::TYPE,
                             :"request-id"    => (request_payload[1,4].unpack("N")[0] || 0),
-                            :"code"          => @version_class::Packet::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED,
+                            :"code"          => @version_class::Packets::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED,
                             :"error message" => "Unsupported type: #{request_type}",
                             :"language tag"  => "",
                           }
