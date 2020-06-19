@@ -18,6 +18,12 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extension::HardlinkAtOpensshCom do
     end
   end
 
+  let(:pkt_args){
+    [
+      {},
+    ]
+  }
+
   let(:packet){
     {
       :"type"             => HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_EXTENDED::TYPE,
@@ -39,13 +45,13 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extension::HardlinkAtOpensshCom do
 
   describe "#encode" do
     it "returns payload encoded" do
-      expect(HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_EXTENDED.new({}).encode(packet)).to eq payload
+      expect(HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_EXTENDED.new(*pkt_args).encode(packet)).to eq payload
     end
   end
 
   describe "#decode" do
     it "returns packet decoded" do
-      expect(HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_EXTENDED.new({}).decode(payload)).to eq packet
+      expect(HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_EXTENDED.new(*pkt_args).decode(payload)).to eq packet
     end
   end
 end

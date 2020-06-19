@@ -8,7 +8,6 @@ RSpec.describe HrrRbSftp::Server do
       Struct.new(:in, :out, :err).new(io_in[1], io_out[0], io_err[0])
     )
   }
-
   let(:logger){
     if ENV["LOGGING"]
       require "logger"
@@ -88,7 +87,7 @@ RSpec.describe HrrRbSftp::Server do
         }
       }
       let(:init_payload){
-        HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT.new({}).encode(init_packet)
+        HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT.new(*pkt_args).encode(init_packet)
       }
 
       before :example do
@@ -106,12 +105,24 @@ RSpec.describe HrrRbSftp::Server do
         context "when remote protocol version is #{version}" do
           let(:version){ version }
 
+          let(:pkt_args){
+            if version < 3
+              [
+                {},
+              ]
+            else
+              [
+                {},
+              ]
+            end
+          }
+
           it "receives init with version #{version} and returns version with version #{version}" do
             io.remote.in.write ([init_payload.bytesize].pack("N") + init_payload)
             payload_length = io.remote.out.read(4).unpack("N")[0]
             payload = io.remote.out.read(payload_length)
             expect( payload[0].unpack("C")[0] ).to eq HrrRbSftp::Protocol::Common::Packet::SSH_FXP_VERSION::TYPE
-            packet = HrrRbSftp::Protocol::Common::Packet::SSH_FXP_VERSION.new({}).decode(payload)
+            packet = HrrRbSftp::Protocol::Common::Packet::SSH_FXP_VERSION.new(*pkt_args).decode(payload)
             expect( packet[:"version"]    ).to eq version
             if version < 3
               expect( packet[:"extensions"] ).to eq []
@@ -139,7 +150,7 @@ RSpec.describe HrrRbSftp::Server do
       }
     }
     let(:init_payload){
-      HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT.new({}).encode(init_packet)
+      HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT.new(*pkt_args).encode(init_packet)
     }
 
     let(:server){ described_class.new logger: logger }
@@ -151,6 +162,18 @@ RSpec.describe HrrRbSftp::Server do
     [1, 2, 3].each do |version|
       context "when remote protocol version is #{version}" do
         let(:version){ version }
+
+        let(:pkt_args){
+          if version < 3
+            [
+              {},
+            ]
+          else
+            [
+              {},
+            ]
+          end
+        }
 
         context "when input IO is closed before receiving packet length" do
           before :example do
@@ -213,7 +236,7 @@ RSpec.describe HrrRbSftp::Server do
       }
     }
     let(:init_payload){
-      HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT.new({}).encode(init_packet)
+      HrrRbSftp::Protocol::Common::Packet::SSH_FXP_INIT.new(*pkt_args).encode(init_packet)
     }
 
     before :example do
@@ -235,6 +258,18 @@ RSpec.describe HrrRbSftp::Server do
         let(:version){ version }
         let(:version_class){ HrrRbSftp::Protocol.const_get(:"Version#{version}") }
 
+        let(:pkt_args){
+          if version < 3
+            [
+              {},
+            ]
+          else
+            [
+              {},
+            ]
+          end
+        }
+
         context "when request type is invalid" do
           let(:realpath_payload){
             [
@@ -250,7 +285,7 @@ RSpec.describe HrrRbSftp::Server do
             payload_length = io.remote.out.read(4).unpack("N")[0]
             payload = io.remote.out.read(payload_length)
             expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-            packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+            packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
             expect( packet[:"request-id"] ).to eq request_id
             expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED
             if version >= 3
@@ -272,7 +307,7 @@ RSpec.describe HrrRbSftp::Server do
             payload_length = io.remote.out.read(4).unpack("N")[0]
             payload = io.remote.out.read(payload_length)
             expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-            packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+            packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
             expect( packet[:"request-id"] ).to eq 0
             expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
             if version >= 3
@@ -296,7 +331,7 @@ RSpec.describe HrrRbSftp::Server do
             payload_length = io.remote.out.read(4).unpack("N")[0]
             payload = io.remote.out.read(payload_length)
             expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-            packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+            packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
             expect( packet[:"request-id"] ).to eq request_id
             expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
             if version >= 3
@@ -317,7 +352,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:open_payload){
-            version_class::Packet::SSH_FXP_OPEN.new({}).encode(open_packet)
+            version_class::Packet::SSH_FXP_OPEN.new(*pkt_args).encode(open_packet)
           }
           let(:request_id){ 1 }
           let(:filename){ "filename" }
@@ -333,7 +368,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]  ).to eq request_id
               expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
             end
@@ -351,7 +386,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]  ).to eq request_id
                 expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
               end
@@ -367,7 +402,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]  ).to eq request_id
                 expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
               end
@@ -386,7 +421,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]  ).to eq request_id
                 expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
               end
@@ -402,7 +437,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]  ).to eq request_id
                 expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
               end
@@ -421,7 +456,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]  ).to eq request_id
                 expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
               end
@@ -437,7 +472,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]  ).to eq request_id
                 expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
               end
@@ -455,7 +490,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]  ).to eq request_id
                 expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
               end
@@ -471,7 +506,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]  ).to eq request_id
                 expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
               end
@@ -489,7 +524,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]  ).to eq request_id
                 expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
               end
@@ -505,7 +540,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]  ).to eq request_id
                 expect( packet[:"handle"]      ).to eq handle.object_id.to_s(16)
               end
@@ -521,7 +556,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -540,7 +575,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -559,7 +594,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -579,7 +614,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
               if version >= 3
@@ -610,7 +645,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               if version >= 3
@@ -630,7 +665,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -653,7 +688,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:open_payload){
-              version_class::Packet::SSH_FXP_OPEN.new({}).encode(open_packet)
+              version_class::Packet::SSH_FXP_OPEN.new(*pkt_args).encode(open_packet)
             }
             let(:open_request_id){ 1 }
             let(:filename){ "filename" }
@@ -669,7 +704,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:close_payload){
-              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+              version_class::Packet::SSH_FXP_CLOSE.new(*pkt_args).encode(close_packet)
             }
             let(:close_request_id){ 2 }
 
@@ -678,7 +713,7 @@ RSpec.describe HrrRbSftp::Server do
               io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
               @handle = packet[:"handle"]
             end
 
@@ -691,7 +726,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq close_request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
               if version >= 3
@@ -710,7 +745,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:close_payload){
-              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+              version_class::Packet::SSH_FXP_CLOSE.new(*pkt_args).encode(close_packet)
             }
             let(:close_request_id){ 2 }
             let(:handle){ "handle" }
@@ -720,7 +755,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq close_request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -743,7 +778,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:open_payload){
-              version_class::Packet::SSH_FXP_OPEN.new({}).encode(open_packet)
+              version_class::Packet::SSH_FXP_OPEN.new(*pkt_args).encode(open_packet)
             }
             let(:open_request_id){ 1 }
             let(:filename){ "filename" }
@@ -759,7 +794,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:close_payload){
-              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+              version_class::Packet::SSH_FXP_CLOSE.new(*pkt_args).encode(close_packet)
             }
             let(:close_request_id){ 20 }
 
@@ -773,7 +808,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:read_payload_0){
-              version_class::Packet::SSH_FXP_READ.new({}).encode(read_packet_0)
+              version_class::Packet::SSH_FXP_READ.new(*pkt_args).encode(read_packet_0)
             }
             let(:read_request_id_0){ 10 }
 
@@ -787,7 +822,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:read_payload_1){
-              version_class::Packet::SSH_FXP_READ.new({}).encode(read_packet_1)
+              version_class::Packet::SSH_FXP_READ.new(*pkt_args).encode(read_packet_1)
             }
             let(:read_request_id_1){ 11 }
 
@@ -801,7 +836,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:read_payload_2){
-              version_class::Packet::SSH_FXP_READ.new({}).encode(read_packet_2)
+              version_class::Packet::SSH_FXP_READ.new(*pkt_args).encode(read_packet_2)
             }
             let(:read_request_id_2){ 12 }
 
@@ -810,7 +845,7 @@ RSpec.describe HrrRbSftp::Server do
               io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
               @handle = packet[:"handle"]
             end
 
@@ -826,7 +861,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_DATA::TYPE
-              packet = version_class::Packet::SSH_FXP_DATA.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_DATA.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq read_request_id_0
               expect( packet[:"data"]       ).to eq content[0,5]
 
@@ -834,7 +869,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_DATA::TYPE
-              packet = version_class::Packet::SSH_FXP_DATA.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_DATA.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq read_request_id_1
               expect( packet[:"data"]       ).to eq content[5,5]
 
@@ -842,7 +877,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq read_request_id_2
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_EOF
               if version >= 3
@@ -863,7 +898,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:read_payload){
-              version_class::Packet::SSH_FXP_READ.new({}).encode(read_packet)
+              version_class::Packet::SSH_FXP_READ.new(*pkt_args).encode(read_packet)
             }
             let(:read_request_id){ 10 }
             let(:handle){ "handle" }
@@ -873,7 +908,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq read_request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -896,7 +931,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:open_payload){
-              version_class::Packet::SSH_FXP_OPEN.new({}).encode(open_packet)
+              version_class::Packet::SSH_FXP_OPEN.new(*pkt_args).encode(open_packet)
             }
             let(:open_request_id){ 1 }
             let(:filename){ "filename" }
@@ -912,7 +947,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:close_payload){
-              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+              version_class::Packet::SSH_FXP_CLOSE.new(*pkt_args).encode(close_packet)
             }
             let(:close_request_id){ 20 }
 
@@ -926,7 +961,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:write_payload_0){
-              version_class::Packet::SSH_FXP_WRITE.new({}).encode(write_packet_0)
+              version_class::Packet::SSH_FXP_WRITE.new(*pkt_args).encode(write_packet_0)
             }
             let(:write_request_id_0){ 10 }
 
@@ -940,7 +975,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:write_payload_1){
-              version_class::Packet::SSH_FXP_WRITE.new({}).encode(write_packet_1)
+              version_class::Packet::SSH_FXP_WRITE.new(*pkt_args).encode(write_packet_1)
             }
             let(:write_request_id_1){ 11 }
 
@@ -948,7 +983,7 @@ RSpec.describe HrrRbSftp::Server do
               io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
               @handle = packet[:"handle"]
             end
 
@@ -960,7 +995,7 @@ RSpec.describe HrrRbSftp::Server do
               io.remote.in.write ([write_payload_0.bytesize].pack("N") + write_payload_0)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq write_request_id_0
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
               if version >= 3
@@ -971,7 +1006,7 @@ RSpec.describe HrrRbSftp::Server do
               io.remote.in.write ([write_payload_1.bytesize].pack("N") + write_payload_1)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq write_request_id_1
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
               if version >= 3
@@ -983,7 +1018,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq close_request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
               if version >= 3
@@ -1006,7 +1041,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:write_payload){
-              version_class::Packet::SSH_FXP_WRITE.new({}).encode(write_packet)
+              version_class::Packet::SSH_FXP_WRITE.new(*pkt_args).encode(write_packet)
             }
             let(:write_request_id){ 10 }
             let(:handle){ "handle" }
@@ -1016,7 +1051,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq write_request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -1036,7 +1071,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:lstat_payload){
-            version_class::Packet::SSH_FXP_LSTAT.new({}).encode(lstat_packet)
+            version_class::Packet::SSH_FXP_LSTAT.new(*pkt_args).encode(lstat_packet)
           }
 
           context "when request is valid" do
@@ -1059,7 +1094,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_ATTRS::TYPE
-              packet = version_class::Packet::SSH_FXP_ATTRS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_ATTRS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]  ).to eq request_id
               expect( packet[:"attrs"]       ).to eq attrs
             end
@@ -1074,7 +1109,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
               if version >= 3
@@ -1104,7 +1139,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               if version >= 3
@@ -1123,7 +1158,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -1146,7 +1181,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:open_payload){
-              version_class::Packet::SSH_FXP_OPEN.new({}).encode(open_packet)
+              version_class::Packet::SSH_FXP_OPEN.new(*pkt_args).encode(open_packet)
             }
             let(:open_request_id){ 1 }
             let(:filename){ "filename" }
@@ -1162,7 +1197,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:close_payload){
-              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+              version_class::Packet::SSH_FXP_CLOSE.new(*pkt_args).encode(close_packet)
             }
             let(:close_request_id){ 20 }
 
@@ -1174,7 +1209,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:fstat_payload){
-              version_class::Packet::SSH_FXP_FSTAT.new({}).encode(fstat_packet)
+              version_class::Packet::SSH_FXP_FSTAT.new(*pkt_args).encode(fstat_packet)
             }
             let(:fstat_request_id){ 10 }
 
@@ -1195,7 +1230,7 @@ RSpec.describe HrrRbSftp::Server do
               io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
               @handle = packet[:"handle"]
             end
 
@@ -1211,7 +1246,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_ATTRS::TYPE
-              packet = version_class::Packet::SSH_FXP_ATTRS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_ATTRS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]  ).to eq fstat_request_id
               expect( packet[:"attrs"]       ).to eq fstat_attrs
             end
@@ -1226,7 +1261,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:fstat_payload){
-              version_class::Packet::SSH_FXP_FSTAT.new({}).encode(fstat_packet)
+              version_class::Packet::SSH_FXP_FSTAT.new(*pkt_args).encode(fstat_packet)
             }
             let(:fstat_request_id){ 10 }
             let(:handle){ "handle" }
@@ -1236,7 +1271,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq fstat_request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -1257,7 +1292,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:setstat_payload){
-            version_class::Packet::SSH_FXP_SETSTAT.new({}).encode(setstat_packet)
+            version_class::Packet::SSH_FXP_SETSTAT.new(*pkt_args).encode(setstat_packet)
           }
 
           context "when request is valid" do
@@ -1296,7 +1331,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
                 if version >= 3
@@ -1338,7 +1373,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
                 if version >= 3
@@ -1371,7 +1406,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
               if version >= 3
@@ -1408,7 +1443,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               if version >= 3
@@ -1434,7 +1469,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -1457,7 +1492,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:open_payload){
-              version_class::Packet::SSH_FXP_OPEN.new({}).encode(open_packet)
+              version_class::Packet::SSH_FXP_OPEN.new(*pkt_args).encode(open_packet)
             }
             let(:open_request_id){ 1 }
             let(:filename){ "filename" }
@@ -1472,7 +1507,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:close_payload){
-              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+              version_class::Packet::SSH_FXP_CLOSE.new(*pkt_args).encode(close_packet)
             }
             let(:close_request_id){ 20 }
 
@@ -1485,7 +1520,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:fsetstat_payload){
-              version_class::Packet::SSH_FXP_FSETSTAT.new({}).encode(fsetstat_packet)
+              version_class::Packet::SSH_FXP_FSETSTAT.new(*pkt_args).encode(fsetstat_packet)
             }
             let(:fsetstat_request_id){ 10 }
 
@@ -1494,7 +1529,7 @@ RSpec.describe HrrRbSftp::Server do
               io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
               @handle = packet[:"handle"]
             end
 
@@ -1530,7 +1565,7 @@ RSpec.describe HrrRbSftp::Server do
                   payload_length = io.remote.out.read(4).unpack("N")[0]
                   payload = io.remote.out.read(payload_length)
                   expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                   expect( packet[:"request-id"]  ).to eq fsetstat_request_id
                   expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
                   if version >= 3
@@ -1551,7 +1586,7 @@ RSpec.describe HrrRbSftp::Server do
                   payload_length = io.remote.out.read(4).unpack("N")[0]
                   payload = io.remote.out.read(payload_length)
                   expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                   expect( packet[:"request-id"]  ).to eq fsetstat_request_id
                   expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
                   if version >= 3
@@ -1592,7 +1627,7 @@ RSpec.describe HrrRbSftp::Server do
                   payload_length = io.remote.out.read(4).unpack("N")[0]
                   payload = io.remote.out.read(payload_length)
                   expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                   expect( packet[:"request-id"]  ).to eq fsetstat_request_id
                   expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
                   if version >= 3
@@ -1614,7 +1649,7 @@ RSpec.describe HrrRbSftp::Server do
                   payload_length = io.remote.out.read(4).unpack("N")[0]
                   payload = io.remote.out.read(payload_length)
                   expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                   expect( packet[:"request-id"]  ).to eq fsetstat_request_id
                   expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                   if version >= 3
@@ -1660,7 +1695,7 @@ RSpec.describe HrrRbSftp::Server do
                   payload_length = io.remote.out.read(4).unpack("N")[0]
                   payload = io.remote.out.read(payload_length)
                   expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                   expect( packet[:"request-id"]  ).to eq fsetstat_request_id
                   expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
                   if version >= 3
@@ -1684,7 +1719,7 @@ RSpec.describe HrrRbSftp::Server do
                   payload_length = io.remote.out.read(4).unpack("N")[0]
                   payload = io.remote.out.read(payload_length)
                   expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                   expect( packet[:"request-id"]  ).to eq fsetstat_request_id
                   expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                   if version >= 3
@@ -1712,7 +1747,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:fsetstat_payload){
-              version_class::Packet::SSH_FXP_FSTAT.new({}).encode(fsetstat_packet)
+              version_class::Packet::SSH_FXP_FSTAT.new(*pkt_args).encode(fsetstat_packet)
             }
             let(:fsetstat_request_id){ 10 }
             let(:handle){ "handle" }
@@ -1729,7 +1764,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq fsetstat_request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -1749,7 +1784,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:opendir_payload){
-            version_class::Packet::SSH_FXP_OPENDIR.new({}).encode(opendir_packet)
+            version_class::Packet::SSH_FXP_OPENDIR.new(*pkt_args).encode(opendir_packet)
           }
           let(:request_id){ 1 }
 
@@ -1763,7 +1798,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_HANDLE::TYPE
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"handle"]     ).to eq handle.object_id.to_s(16)
             end
@@ -1777,7 +1812,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
               if version >= 3
@@ -1806,7 +1841,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               if version >= 3
@@ -1833,7 +1868,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -1851,7 +1886,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -1872,7 +1907,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:opendir_payload){
-              version_class::Packet::SSH_FXP_OPENDIR.new({}).encode(opendir_packet)
+              version_class::Packet::SSH_FXP_OPENDIR.new(*pkt_args).encode(opendir_packet)
             }
             let(:opendir_request_id){ 1 }
             let(:path){ "dirX" }
@@ -1887,7 +1922,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:close_payload){
-              version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+              version_class::Packet::SSH_FXP_CLOSE.new(*pkt_args).encode(close_packet)
             }
             let(:close_request_id){ 20 }
 
@@ -1899,7 +1934,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:readdir_payload_0){
-              version_class::Packet::SSH_FXP_READDIR.new({}).encode(readdir_packet_0)
+              version_class::Packet::SSH_FXP_READDIR.new(*pkt_args).encode(readdir_packet_0)
             }
             let(:readdir_request_id_0){ 10 }
 
@@ -1911,7 +1946,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:readdir_payload_1){
-              version_class::Packet::SSH_FXP_READDIR.new({}).encode(readdir_packet_1)
+              version_class::Packet::SSH_FXP_READDIR.new(*pkt_args).encode(readdir_packet_1)
             }
             let(:readdir_request_id_1){ 11 }
 
@@ -1972,7 +2007,7 @@ RSpec.describe HrrRbSftp::Server do
               io.remote.in.write ([opendir_payload.bytesize].pack("N") + opendir_payload)
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
-              packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
               @handle = packet[:"handle"]
             end
 
@@ -1988,7 +2023,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_NAME::TYPE
-              packet = version_class::Packet::SSH_FXP_NAME.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_NAME.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]  ).to eq readdir_request_id_0
               expect( packet[:"count"]       ).to eq 4
               list = {
@@ -2011,7 +2046,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq readdir_request_id_1
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_EOF
               if version >= 3
@@ -2030,7 +2065,7 @@ RSpec.describe HrrRbSftp::Server do
               }
             }
             let(:readdir_payload){
-              version_class::Packet::SSH_FXP_READDIR.new({}).encode(readdir_packet)
+              version_class::Packet::SSH_FXP_READDIR.new(*pkt_args).encode(readdir_packet)
             }
             let(:readdir_request_id){ 10 }
             let(:handle){ "handle" }
@@ -2040,7 +2075,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq readdir_request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -2060,7 +2095,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:remove_payload){
-            version_class::Packet::SSH_FXP_REMOVE.new({}).encode(remove_packet)
+            version_class::Packet::SSH_FXP_REMOVE.new(*pkt_args).encode(remove_packet)
           }
 
           context "when request is valid" do
@@ -2081,7 +2116,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
               if version >= 3
@@ -2101,7 +2136,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
               if version >= 3
@@ -2131,7 +2166,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               if version >= 3
@@ -2150,7 +2185,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -2171,7 +2206,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:mkdir_payload){
-            version_class::Packet::SSH_FXP_MKDIR.new({}).encode(mkdir_packet)
+            version_class::Packet::SSH_FXP_MKDIR.new(*pkt_args).encode(mkdir_packet)
           }
           let(:request_id){ 1 }
           let(:attrs){ {:"permissions" => 040700} }
@@ -2188,7 +2223,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
               if version >= 3
@@ -2220,7 +2255,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               if version >= 3
@@ -2246,7 +2281,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -2264,7 +2299,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -2284,7 +2319,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:rmdir_payload){
-            version_class::Packet::SSH_FXP_RMDIR.new({}).encode(rmdir_packet)
+            version_class::Packet::SSH_FXP_RMDIR.new(*pkt_args).encode(rmdir_packet)
           }
           let(:request_id){ 1 }
 
@@ -2300,7 +2335,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
               if version >= 3
@@ -2319,7 +2354,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
               if version >= 3
@@ -2348,7 +2383,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               if version >= 3
@@ -2374,7 +2409,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -2401,7 +2436,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -2419,7 +2454,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -2439,7 +2474,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:realpath_payload){
-            version_class::Packet::SSH_FXP_REALPATH.new({}).encode(realpath_packet)
+            version_class::Packet::SSH_FXP_REALPATH.new(*pkt_args).encode(realpath_packet)
           }
 
           context "when request is valid" do
@@ -2451,7 +2486,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_NAME::TYPE
-              packet = version_class::Packet::SSH_FXP_NAME.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_NAME.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]  ).to eq request_id
               expect( packet[:"count"]       ).to eq 1
               expect( packet[:"filename[0]"] ).to eq File.absolute_path(path)
@@ -2470,7 +2505,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:stat_payload){
-            version_class::Packet::SSH_FXP_STAT.new({}).encode(stat_packet)
+            version_class::Packet::SSH_FXP_STAT.new(*pkt_args).encode(stat_packet)
           }
 
           context "when request is valid" do
@@ -2493,7 +2528,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_ATTRS::TYPE
-              packet = version_class::Packet::SSH_FXP_ATTRS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_ATTRS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]  ).to eq request_id
               expect( packet[:"attrs"]       ).to eq attrs
             end
@@ -2508,7 +2543,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
               if version >= 3
@@ -2538,7 +2573,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               if version >= 3
@@ -2557,7 +2592,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -2580,7 +2615,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:rename_payload){
-            version_class::Packet::SSH_FXP_RENAME.new({}).encode(rename_packet)
+            version_class::Packet::SSH_FXP_RENAME.new(*pkt_args).encode(rename_packet)
           }
 
           context "when request is valid" do
@@ -2603,7 +2638,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
               if version >= 3
@@ -2633,7 +2668,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -2653,7 +2688,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
               if version >= 3
@@ -2684,7 +2719,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               if version >= 3
@@ -2712,7 +2747,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"] ).to eq request_id
               expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               if version >= 3
@@ -2734,7 +2769,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:readlink_payload){
-            version_class::Packet::SSH_FXP_READLINK.new({}).encode(readlink_packet)
+            version_class::Packet::SSH_FXP_READLINK.new(*pkt_args).encode(readlink_packet)
           }
 
           context "when request is valid" do
@@ -2757,7 +2792,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_NAME::TYPE
-              packet = version_class::Packet::SSH_FXP_NAME.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_NAME.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]  ).to eq request_id
               expect( packet[:"count"]       ).to eq 1
               expect( packet[:"filename[0]"] ).to eq File.realpath(target)
@@ -2775,7 +2810,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]    ).to eq request_id
               expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
               expect( packet[:"error message"] ).to eq "No such file or directory"
@@ -2803,7 +2838,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]    ).to eq request_id
               expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               expect( packet[:"error message"] ).to eq "Permission denied"
@@ -2820,7 +2855,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]    ).to eq request_id
               expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               expect( packet[:"error message"] ).to start_with "File name too long"
@@ -2839,7 +2874,7 @@ RSpec.describe HrrRbSftp::Server do
             }
           }
           let(:symlink_payload){
-            version_class::Packet::SSH_FXP_SYMLINK.new({}).encode(symlink_packet)
+            version_class::Packet::SSH_FXP_SYMLINK.new(*pkt_args).encode(symlink_packet)
           }
 
           context "when request is valid" do
@@ -2856,7 +2891,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]    ).to eq request_id
               expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
               expect( packet[:"error message"] ).to eq "Success"
@@ -2885,7 +2920,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]    ).to eq request_id
               expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
               expect( packet[:"error message"] ).to eq "Permission denied"
@@ -2911,7 +2946,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]    ).to eq request_id
               expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               expect( packet[:"error message"] ).to eq "File exists"
@@ -2929,7 +2964,7 @@ RSpec.describe HrrRbSftp::Server do
               payload_length = io.remote.out.read(4).unpack("N")[0]
               payload = io.remote.out.read(payload_length)
               expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-              packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+              packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
               expect( packet[:"request-id"]    ).to eq request_id
               expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
               expect( packet[:"error message"] ).to start_with "File name too long"
@@ -2940,7 +2975,7 @@ RSpec.describe HrrRbSftp::Server do
 
         context "when responding to extended request" do
           let(:extended_payload){
-            version_class::Packet::SSH_FXP_EXTENDED.new({}).encode(extended_packet)
+            version_class::Packet::SSH_FXP_EXTENDED.new(*pkt_args).encode(extended_packet)
           }
 
           context "with unsupported extended-request" do
@@ -2961,7 +2996,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]    ).to eq request_id
                 expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED
                 expect( packet[:"error message"] ).to eq "Unsupported extended-request: #{extended_request}"
@@ -3001,7 +3036,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]    ).to eq request_id
                 expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
                 expect( packet[:"error message"] ).to eq "Success"
@@ -3020,7 +3055,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
                 expect( packet[:"error message"] ).to eq "No such file or directory"
@@ -3048,7 +3083,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
                 expect( packet[:"error message"] ).to eq "Permission denied"
@@ -3077,7 +3112,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
                 expect( packet[:"error message"] ).to eq "Permission denied"
@@ -3105,7 +3140,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                 expect( packet[:"error message"] ).to eq "File exists"
@@ -3131,7 +3166,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                 expect( packet[:"error message"] ).to start_with "File name too long"
@@ -3162,7 +3197,7 @@ RSpec.describe HrrRbSftp::Server do
                 }
               }
               let(:open_payload){
-                version_class::Packet::SSH_FXP_OPEN.new({}).encode(open_packet)
+                version_class::Packet::SSH_FXP_OPEN.new(*pkt_args).encode(open_packet)
               }
               let(:open_request_id){ 1 }
               let(:filename){ "filename" }
@@ -3177,7 +3212,7 @@ RSpec.describe HrrRbSftp::Server do
                 }
               }
               let(:close_payload){
-                version_class::Packet::SSH_FXP_CLOSE.new({}).encode(close_packet)
+                version_class::Packet::SSH_FXP_CLOSE.new(*pkt_args).encode(close_packet)
               }
               let(:close_request_id){ 20 }
 
@@ -3187,7 +3222,7 @@ RSpec.describe HrrRbSftp::Server do
                 io.remote.in.write ([open_payload.bytesize].pack("N") + open_payload)
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
-                packet = version_class::Packet::SSH_FXP_HANDLE.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_HANDLE.new(*pkt_args).decode(payload)
                 @handle = packet[:"handle"]
               end
 
@@ -3200,7 +3235,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]    ).to eq extended_request_id
                 expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
                 expect( packet[:"error message"] ).to eq "Success"
@@ -3220,7 +3255,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"]    ).to eq extended_request_id
                 expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                 expect( packet[:"error message"] ).to eq "Specified handle does not exist"
@@ -3262,7 +3297,7 @@ RSpec.describe HrrRbSftp::Server do
                   payload_length = io.remote.out.read(4).unpack("N")[0]
                   payload = io.remote.out.read(payload_length)
                   expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                   expect( packet[:"request-id"]    ).to eq request_id
                   expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
                   expect( packet[:"error message"] ).to eq "Success"
@@ -3289,7 +3324,7 @@ RSpec.describe HrrRbSftp::Server do
                   payload_length = io.remote.out.read(4).unpack("N")[0]
                   payload = io.remote.out.read(payload_length)
                   expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                  packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                  packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                   expect( packet[:"request-id"]    ).to eq request_id
                   expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
                   expect( packet[:"error message"] ).to eq "Success"
@@ -3310,7 +3345,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
                 expect( packet[:"error message"] ).to eq "No such file or directory"
@@ -3338,7 +3373,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
                 expect( packet[:"error message"] ).to eq "Permission denied"
@@ -3367,7 +3402,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
                 expect( packet[:"error message"] ).to eq "Permission denied"
@@ -3393,7 +3428,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                 expect( packet[:"error message"] ).to start_with "File name too long"
@@ -3448,7 +3483,7 @@ RSpec.describe HrrRbSftp::Server do
                     payload_length = io.remote.out.read(4).unpack("N")[0]
                     payload = io.remote.out.read(payload_length)
                     expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                     expect( packet[:"request-id"]    ).to eq request_id
                     expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_OK
                     expect( packet[:"error message"] ).to eq "Success"
@@ -3462,7 +3497,7 @@ RSpec.describe HrrRbSftp::Server do
                     payload_length = io.remote.out.read(4).unpack("N")[0]
                     payload = io.remote.out.read(payload_length)
                     expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                     expect( packet[:"request-id"]    ).to eq request_id
                     expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                     expect( packet[:"error message"] ).to eq "File.lutime is not supported on this Ruby version"
@@ -3496,7 +3531,7 @@ RSpec.describe HrrRbSftp::Server do
                     payload_length = io.remote.out.read(4).unpack("N")[0]
                     payload = io.remote.out.read(payload_length)
                     expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                     expect( packet[:"request-id"]    ).to eq request_id
                     if newattrs.has_key?(:"permissions") && ! File.respond_to?(:lchmod)
                       expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
@@ -3520,7 +3555,7 @@ RSpec.describe HrrRbSftp::Server do
                     payload_length = io.remote.out.read(4).unpack("N")[0]
                     payload = io.remote.out.read(payload_length)
                     expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                     expect( packet[:"request-id"]    ).to eq request_id
                     expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                     expect( packet[:"error message"] ).to eq "File.lutime is not supported on this Ruby version"
@@ -3559,7 +3594,7 @@ RSpec.describe HrrRbSftp::Server do
                     payload_length = io.remote.out.read(4).unpack("N")[0]
                     payload = io.remote.out.read(payload_length)
                     expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                     expect( packet[:"request-id"]    ).to eq request_id
                     expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
                     expect( packet[:"error message"] ).to eq "Permission denied"
@@ -3576,7 +3611,7 @@ RSpec.describe HrrRbSftp::Server do
                     payload_length = io.remote.out.read(4).unpack("N")[0]
                     payload = io.remote.out.read(payload_length)
                     expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                    packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                    packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                     expect( packet[:"request-id"]    ).to eq request_id
                     expect( packet[:"code"]          ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                     expect( packet[:"error message"] ).to eq "File.lutime is not supported on this Ruby version"
@@ -3605,7 +3640,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
                 expect( packet[:"error message"] ).to eq "Bad message"
@@ -3628,7 +3663,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_NO_SUCH_FILE
                 expect( packet[:"error message"] ).to eq "No such file or directory"
@@ -3661,7 +3696,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_PERMISSION_DENIED
                 expect( packet[:"error message"] ).to eq "Permission denied"
@@ -3684,7 +3719,7 @@ RSpec.describe HrrRbSftp::Server do
                 payload_length = io.remote.out.read(4).unpack("N")[0]
                 payload = io.remote.out.read(payload_length)
                 expect( payload[0].unpack("C")[0] ).to eq version_class::Packet::SSH_FXP_STATUS::TYPE
-                packet = version_class::Packet::SSH_FXP_STATUS.new({}).decode(payload)
+                packet = version_class::Packet::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
                 expect( packet[:"request-id"] ).to eq request_id
                 expect( packet[:"code"]       ).to eq version_class::Packet::SSH_FXP_STATUS::SSH_FX_FAILURE
                 expect( packet[:"error message"] ).to start_with "File name too long"

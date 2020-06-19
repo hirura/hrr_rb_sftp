@@ -5,6 +5,12 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_MKDIR do
 
   let(:type){ 14 }
 
+  let(:pkt_args){
+    [
+      {},
+    ]
+  }
+
   let(:packet){
     {
       :"type"       => type,
@@ -24,13 +30,13 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_MKDIR do
 
   describe "#encode" do
     it "returns payload encoded" do
-      expect(described_class.new({}).encode(packet)).to eq payload
+      expect(described_class.new(*pkt_args).encode(packet)).to eq payload
     end
   end
 
   describe "#decode" do
     it "returns packet decoded" do
-      expect(described_class.new({}).decode(payload)).to eq packet
+      expect(described_class.new(*pkt_args).decode(payload)).to eq packet
     end
   end
 end
