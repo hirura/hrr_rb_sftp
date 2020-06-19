@@ -47,28 +47,14 @@ module HrrRbSftp
           #
           def respond_to request
             begin
-              @extensions ||= (
-                extension_classes = extension.constants.map{|c| extension.const_get(c)}.select{|c| c.const_defined?(:EXTENSION_NAME)}
-                extensions = Hash.new
-                extension_classes.each do |c|
-                  if extended_requests = c::REQUEST_FORMAT[:"extended-request"]
-                    instance = c.new(context, logger: logger)
-                    extended_requests.each_key do |k|
-                      extensions[k] = instance
-                    end
-                  end
-                end
-                extensions
-              )
-              extended_request = request[:"extended-request"]
-              if @extensions.has_key?(extended_request)
-                @extensions[extended_request].respond_to request
+              if extensions.respond_to? request
+                extensions.respond_to request
               else
                 {
                   :"type"          => Packet::SSH_FXP_STATUS::TYPE,
                   :"request-id"    => request[:"request-id"],
                   :"code"          => Packet::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED,
-                  :"error message" => "Unsupported extended-request: #{extended_request}",
+                  :"error message" => "Unsupported extended-request: #{request[:"extended-request"]}",
                   :"language tag"  => "",
                 }
               end
@@ -91,7 +77,7 @@ module HrrRbSftp
           #
           def conditional_format packet
             packet.inject([]){ |a, (field_name, field_value)|
-              a + ((extension.conditional_request_format[field_name] || {})[field_value] || [])
+              a + ((extensions.conditional_request_format[field_name] || {})[field_value] || [])
             }
           end
         end

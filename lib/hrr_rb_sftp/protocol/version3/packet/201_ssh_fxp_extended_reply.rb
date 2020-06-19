@@ -42,7 +42,7 @@ module HrrRbSftp
           #
           def conditional_format packet
             packet.inject([]){ |a, (field_name, field_value)|
-              a + ((extension.conditional_reply_format[field_name] || {})[field_value] || [])
+              a + ((extensions.conditional_reply_format[field_name] || {})[field_value] || [])
             }
           end
         end

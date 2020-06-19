@@ -112,8 +112,9 @@ RSpec.describe HrrRbSftp::Server do
                 {},
               ]
             else
+              context = {}
               [
-                {:extension => version_class::Extension},
+                context.update({:extensions => HrrRbSftp::Protocol::Version3::Extensions.new(context)}),
               ]
             end
           }
@@ -171,8 +172,9 @@ RSpec.describe HrrRbSftp::Server do
               {},
             ]
           else
+            context = {}
             [
-              {:extension => version_class::Extension},
+              context.update({:extensions => HrrRbSftp::Protocol::Version3::Extensions.new(context)}),
             ]
           end
         }
@@ -266,8 +268,9 @@ RSpec.describe HrrRbSftp::Server do
               {},
             ]
           else
+            context = {}
             [
-              {:extension => version_class::Extension},
+              context.update({:extensions => HrrRbSftp::Protocol::Version3::Extensions.new(context)}),
             ]
           end
         }

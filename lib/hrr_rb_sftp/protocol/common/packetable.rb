@@ -13,7 +13,7 @@ module HrrRbSftp
         #
         # @param context [Hash] Contextual variables.
         #   - :handles (Hash\\{String=>File, Dir\}) - Opened handles.
-        #   - :extension (Class) - Extension class.
+        #   - :extensions (Extensions) - An instance of Extensions.
         # @param logger [Logger] Logger.
         #
         def initialize context, logger: nil
@@ -27,7 +27,7 @@ module HrrRbSftp
         #
         # @return [Hash] Contextual variables.
         #   - :handles (Hash\\{String=>File, Dir\}) - Opened handles.
-        #   - :extension (Class) - Extension class.
+        #   - :extensions (Extensions) - An instance of Extensions.
         #
         def context
           @context
@@ -43,12 +43,12 @@ module HrrRbSftp
         end
 
         #
-        # Returns Extension class.
+        # Returns An instance of Extensions.
         #
-        # @return [Class] Extension class.
+        # @return [Extensions] An instance of Extensions.
         #
-        def extension
-          @context[:extension]
+        def extensions
+          @context[:extensions]
         end
 
         #

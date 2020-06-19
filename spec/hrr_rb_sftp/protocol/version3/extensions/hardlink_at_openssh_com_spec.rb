@@ -1,4 +1,4 @@
-RSpec.describe HrrRbSftp::Protocol::Version3::Extension::HardlinkAtOpensshCom do
+RSpec.describe HrrRbSftp::Protocol::Version3::Extensions::HardlinkAtOpensshCom do
   it "includes Common::Extensionable module" do
     expect( described_class ).to include(HrrRbSftp::Protocol::Common::Extensionable)
   end
@@ -19,8 +19,9 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extension::HardlinkAtOpensshCom do
   end
 
   let(:pkt_args){
+    context = {}
     [
-      {:extension => HrrRbSftp::Protocol::Version3::Extension},
+      context.update({:extensions => HrrRbSftp::Protocol::Version3::Extensions.new(context)}),
     ]
   }
 

@@ -1,7 +1,7 @@
 module HrrRbSftp
   class Protocol
     class Version3
-      class Extension
+      class Extensions
 
         #
         # This class implements posix-rename@openssh.com version 1 extension format and responder.

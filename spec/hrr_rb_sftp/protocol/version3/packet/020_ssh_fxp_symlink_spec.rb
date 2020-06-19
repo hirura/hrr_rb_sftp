@@ -12,8 +12,9 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_SYMLINK do
   end
 
   let(:pkt_args){
+    context = {}
     [
-      {:extension => HrrRbSftp::Protocol::Version3::Extension},
+      context.update({:extensions => HrrRbSftp::Protocol::Version3::Extensions.new(context)}),
     ]
   }
 

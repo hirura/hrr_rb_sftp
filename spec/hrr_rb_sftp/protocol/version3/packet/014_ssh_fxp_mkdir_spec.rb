@@ -6,8 +6,9 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packet::SSH_FXP_MKDIR do
   let(:type){ 14 }
 
   let(:pkt_args){
+    context = {}
     [
-      {:extension => HrrRbSftp::Protocol::Version3::Extension},
+      context.update({:extensions => HrrRbSftp::Protocol::Version3::Extensions.new(context)}),
     ]
   }
 

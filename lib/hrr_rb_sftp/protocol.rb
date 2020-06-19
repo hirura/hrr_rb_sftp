@@ -18,9 +18,8 @@ module HrrRbSftp
     #
     def self.list_extensions version
       version_class = self.const_get(:"Version#{version}")
-      if version_class.const_defined?(:Extension)
-        extension_modules = version_class::Extension.constants.map{|c| version_class::Extension.const_get(c)}.select{|m| m.const_defined?(:EXTENSION_NAME)}
-        extension_modules.map{|m| {:"extension-name" => m::EXTENSION_NAME, :"extension-data" => m::EXTENSION_DATA}}
+      if version_class.const_defined?(:Extensions)
+        version_class::Extensions.extension_classes.map{|c| {:"extension-name" => c::EXTENSION_NAME, :"extension-data" => c::EXTENSION_DATA}}
       else
         []
       end
@@ -36,7 +35,7 @@ module HrrRbSftp
       @version_class = self.class.const_get(:"Version#{@version}")
       @context = Hash.new
       @context[:handles] = Hash.new
-      @context[:extension] = @version_class::Extension if @version_class.const_defined?(:Extension)
+      @context[:extensions] = @version_class::Extensions.new(@context, logger: logger) if @version_class.const_defined?(:Extensions)
       packet_classes = @version_class::Packet.constants.select{|c| c.to_s.start_with?("SSH_FXP_")}.map{|c| @version_class::Packet.const_get(c)}
       @packets = packet_classes.map{|pkt| [pkt::TYPE, pkt.new(@context, logger: logger)]}.inject(Hash.new){|h,(k,v)| h.update({k => v})}
     end

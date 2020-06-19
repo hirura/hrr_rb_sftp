@@ -1,4 +1,4 @@
-RSpec.describe HrrRbSftp::Protocol::Version3::Extension do
+RSpec.describe HrrRbSftp::Protocol::Version3::Extensions do
   dummy_class_name = :"Dummy"
   dummy_extension_name = "dummy@dummy.dummy"
   dummy_request_format = {
@@ -16,11 +16,19 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extension do
     },
   }
 
+  let(:context){
+    {}
+  }
+
   before :all do
     dummy_class = Class.new do |klass|
+      include HrrRbSftp::Protocol::Common::Extensionable
       klass::EXTENSION_NAME = dummy_extension_name
       klass::REQUEST_FORMAT = dummy_request_format
       klass::REPLY_FORMAT   = dummy_reply_format
+      def respond_to request
+        "dummy"
+      end
     end
     described_class.send(:const_set, dummy_class_name, dummy_class)
   end
@@ -29,15 +37,58 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extension do
     described_class.send(:remove_const, dummy_class_name)
   end
 
-  describe ".conditional_request_format" do
-    it "includes REQUEST_FORMAT" do
-      expect( described_class.conditional_request_format[:"extended-request"][dummy_extension_name] ).to match_array(dummy_request_format[:"extended-request"][dummy_extension_name])
+  describe ".extension_classes" do
+    it "includes classes that has EXTENSION_NAME constant" do
+      expect( described_class.extension_classes.all?{|c| c.const_defined?(:EXTENSION_NAME)} ).to be true
     end
   end
 
-  describe ".conditional_reply_format" do
+  describe "#respond_to?" do
+    let(:request){
+      {
+        :"extended-request" => extended_request,
+      }
+    }
+
+    context "when request argment is valid" do
+      let(:extended_request){ dummy_extension_name }
+
+      it "returns true" do
+        expect( described_class.new(context).respond_to?(request) ).to be true
+      end
+    end
+
+    context "when request argment is not valid" do
+      let(:extended_request){ "undefined" }
+
+      it "returns false" do
+        expect( described_class.new(context).respond_to?(request) ).to be false
+      end
+    end
+  end
+
+  describe "#respond_to" do
+    let(:request){
+      {
+        :"extended-request" => extended_request,
+      }
+    }
+    let(:extended_request){ dummy_extension_name }
+
+    it "returns response" do
+      expect( described_class.new(context).respond_to(request) ).to eq "dummy"
+    end
+  end
+
+  describe "#conditional_request_format" do
+    it "includes REQUEST_FORMAT" do
+      expect( described_class.new(context).conditional_request_format[:"extended-request"][dummy_extension_name] ).to match_array(dummy_request_format[:"extended-request"][dummy_extension_name])
+    end
+  end
+
+  describe "#conditional_reply_format" do
     it "includes REPLY_FORMAT" do
-      expect( described_class.conditional_reply_format[:"extended-reply"][dummy_extension_name] ).to match_array(dummy_reply_format[:"extended-reply"][dummy_extension_name])
+      expect( described_class.new(context).conditional_reply_format[:"extended-reply"][dummy_extension_name] ).to match_array(dummy_reply_format[:"extended-reply"][dummy_extension_name])
     end
   end
 end
