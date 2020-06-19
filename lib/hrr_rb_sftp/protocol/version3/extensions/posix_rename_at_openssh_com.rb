@@ -6,8 +6,7 @@ module HrrRbSftp
         #
         # This class implements posix-rename@openssh.com version 1 extension format and responder.
         #
-        class PosixRenameAtOpensshCom
-          include Common::Extensionable
+        class PosixRenameAtOpensshCom < Extension
 
           #
           # Represents posix-rename@openssh.com version 1 extension name.

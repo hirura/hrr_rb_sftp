@@ -1,6 +1,6 @@
 RSpec.describe HrrRbSftp::Protocol::Version3::Extensions::HardlinkAtOpensshCom do
-  it "includes Common::Extensionable module" do
-    expect( described_class ).to include(HrrRbSftp::Protocol::Common::Extensionable)
+  it "inherits Extension class" do
+    expect( described_class ).to be < HrrRbSftp::Protocol::Version3::Extensions::Extension
   end
 
   let(:extension_name){ "hardlink@openssh.com" }

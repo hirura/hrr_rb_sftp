@@ -6,8 +6,7 @@ module HrrRbSftp
         #
         # This class implements fsync@openssh.com version 1 extension format and responder.
         #
-        class FsyncAtOpensshCom
-          include Common::Extensionable
+        class FsyncAtOpensshCom < Extension
 
           #
           # Represents fsync@openssh.com version 1 extension name.

@@ -6,8 +6,7 @@ module HrrRbSftp
         #
         # This class implements lsetstat@openssh.com version 1 extension format and responder.
         #
-        class LsetstatAtOpensshCom
-          include Common::Extensionable
+        class LsetstatAtOpensshCom < Extension
 
           #
           # Represents lsetstat@openssh.com version 1 extension name.

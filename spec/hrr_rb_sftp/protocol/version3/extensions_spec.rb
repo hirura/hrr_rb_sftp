@@ -21,8 +21,7 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extensions do
   }
 
   before :all do
-    dummy_class = Class.new do |klass|
-      include HrrRbSftp::Protocol::Common::Extensionable
+    dummy_class = Class.new(described_class::Extension) do |klass|
       klass::EXTENSION_NAME = dummy_extension_name
       klass::REQUEST_FORMAT = dummy_request_format
       klass::REPLY_FORMAT   = dummy_reply_format

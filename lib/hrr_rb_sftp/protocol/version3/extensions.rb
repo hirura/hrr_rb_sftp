@@ -80,6 +80,7 @@ module HrrRbSftp
   end
 end
 
+require "hrr_rb_sftp/protocol/version3/extensions/extension"
 require "hrr_rb_sftp/protocol/version3/extensions/hardlink_at_openssh_com"
 require "hrr_rb_sftp/protocol/version3/extensions/fsync_at_openssh_com"
 require "hrr_rb_sftp/protocol/version3/extensions/posix_rename_at_openssh_com"

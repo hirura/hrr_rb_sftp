@@ -6,8 +6,7 @@ module HrrRbSftp
         #
         # This class implements hardlink@openssh.com version 1 extension format and responder.
         #
-        class HardlinkAtOpensshCom
-          include Common::Extensionable
+        class HardlinkAtOpensshCom < Extension
 
           #
           # Represents hardlink@openssh.com version 1 extension name.
