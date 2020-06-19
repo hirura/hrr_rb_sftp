@@ -1,7 +1,7 @@
 module HrrRbSftp
   class Protocol
     module Common
-      module DataType
+      module DataTypes
 
         #
         # This module provides methods to convert ::Integer value and 8-bit unsigned binary string each other.

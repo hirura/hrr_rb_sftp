@@ -25,7 +25,7 @@ module HrrRbSftp
           REQUEST_FORMAT = {
             :"extended-request" => {
               "fsync@openssh.com" => [
-                [DataType::String, :"handle"],
+                [DataTypes::String, :"handle"],
               ],
             },
           }

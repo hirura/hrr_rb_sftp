@@ -18,8 +18,8 @@ module HrrRbSftp
           # Represents SSH_FXP_EXTENDED_REPLY packet format.
           #
           FORMAT = [
-            [DataType::Byte,   :"type"      ],
-            [DataType::Uint32, :"request-id"],
+            [DataTypes::Byte,   :"type"      ],
+            [DataTypes::Uint32, :"request-id"],
           ]
 
           #

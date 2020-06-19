@@ -18,10 +18,10 @@ module HrrRbSftp
           # Represents SSH_FXP_SYMLINK packet format.
           #
           FORMAT = [
-            [DataType::Byte,   :"type"      ],
-            [DataType::Uint32, :"request-id"],
-            [DataType::String, :"targetpath"],
-            [DataType::String, :"linkpath"  ],
+            [DataTypes::Byte,   :"type"      ],
+            [DataTypes::Uint32, :"request-id"],
+            [DataTypes::String, :"targetpath"],
+            [DataTypes::String, :"linkpath"  ],
           ]
 
           #

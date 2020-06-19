@@ -27,10 +27,10 @@ RSpec.describe HrrRbSftp::Protocol::Version2::Packets::SSH_FXP_RENAME do
   }
   let(:payload){
     [
-      HrrRbSftp::Protocol::Version2::DataType::Byte.encode(packet[:"type"]),
-      HrrRbSftp::Protocol::Version2::DataType::Uint32.encode(packet[:"request-id"]),
-      HrrRbSftp::Protocol::Version2::DataType::String.encode(packet[:"oldpath"]),
-      HrrRbSftp::Protocol::Version2::DataType::String.encode(packet[:"newpath"]),
+      HrrRbSftp::Protocol::Version2::DataTypes::Byte.encode(packet[:"type"]),
+      HrrRbSftp::Protocol::Version2::DataTypes::Uint32.encode(packet[:"request-id"]),
+      HrrRbSftp::Protocol::Version2::DataTypes::String.encode(packet[:"oldpath"]),
+      HrrRbSftp::Protocol::Version2::DataTypes::String.encode(packet[:"newpath"]),
     ].join
   }
 

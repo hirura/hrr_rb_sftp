@@ -28,10 +28,10 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_SYMLINK do
   }
   let(:payload){
     [
-      HrrRbSftp::Protocol::Version3::DataType::Byte.encode(packet[:"type"]),
-      HrrRbSftp::Protocol::Version3::DataType::Uint32.encode(packet[:"request-id"]),
-      HrrRbSftp::Protocol::Version3::DataType::String.encode(packet[:"targetpath"]),
-      HrrRbSftp::Protocol::Version3::DataType::String.encode(packet[:"linkpath"]),
+      HrrRbSftp::Protocol::Version3::DataTypes::Byte.encode(packet[:"type"]),
+      HrrRbSftp::Protocol::Version3::DataTypes::Uint32.encode(packet[:"request-id"]),
+      HrrRbSftp::Protocol::Version3::DataTypes::String.encode(packet[:"targetpath"]),
+      HrrRbSftp::Protocol::Version3::DataTypes::String.encode(packet[:"linkpath"]),
     ].join
   }
 

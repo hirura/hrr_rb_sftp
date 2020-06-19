@@ -18,9 +18,9 @@ module HrrRbSftp
           # Represents SSH_FXP_REMOVE packet format.
           #
           FORMAT = [
-            [DataType::Byte,   :"type"      ],
-            [DataType::Uint32, :"request-id"],
-            [DataType::String, :"filename"  ],
+            [DataTypes::Byte,   :"type"      ],
+            [DataTypes::Uint32, :"request-id"],
+            [DataTypes::String, :"filename"  ],
           ]
 
           #

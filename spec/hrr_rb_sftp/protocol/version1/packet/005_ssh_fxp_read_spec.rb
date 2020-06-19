@@ -28,11 +28,11 @@ RSpec.describe HrrRbSftp::Protocol::Version1::Packets::SSH_FXP_READ do
   }
   let(:payload){
     [
-      HrrRbSftp::Protocol::Version1::DataType::Byte.encode(packet[:"type"]),
-      HrrRbSftp::Protocol::Version1::DataType::Uint32.encode(packet[:"request-id"]),
-      HrrRbSftp::Protocol::Version1::DataType::String.encode(packet[:"handle"]),
-      HrrRbSftp::Protocol::Version1::DataType::Uint64.encode(packet[:"offset"]),
-      HrrRbSftp::Protocol::Version1::DataType::Uint32.encode(packet[:"len"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Byte.encode(packet[:"type"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Uint32.encode(packet[:"request-id"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::String.encode(packet[:"handle"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Uint64.encode(packet[:"offset"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Uint32.encode(packet[:"len"]),
     ].join
   }
 

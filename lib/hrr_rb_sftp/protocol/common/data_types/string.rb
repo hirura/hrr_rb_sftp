@@ -1,7 +1,7 @@
 module HrrRbSftp
   class Protocol
     module Common
-      module DataType
+      module DataTypes
 
         #
         # This module provides methods to convert ::String value and binary string with its length each other.

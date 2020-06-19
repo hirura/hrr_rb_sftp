@@ -1,7 +1,7 @@
 module HrrRbSftp
   class Protocol
     module Common
-      module DataType
+      module DataTypes
 
         #
         # This module provides methods to convert list of extension-name and extension-data pair represented in ::Array and binary string each other.

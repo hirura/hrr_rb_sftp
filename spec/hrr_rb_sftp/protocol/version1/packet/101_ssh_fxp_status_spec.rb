@@ -98,9 +98,9 @@ RSpec.describe HrrRbSftp::Protocol::Version1::Packets::SSH_FXP_STATUS do
   }
   let(:payload){
     [
-      HrrRbSftp::Protocol::Common::DataType::Byte.encode(packet[:"type"]),
-      HrrRbSftp::Protocol::Common::DataType::Uint32.encode(packet[:"request-id"]),
-      HrrRbSftp::Protocol::Common::DataType::Uint32.encode(packet[:"code"]),
+      HrrRbSftp::Protocol::Common::DataTypes::Byte.encode(packet[:"type"]),
+      HrrRbSftp::Protocol::Common::DataTypes::Uint32.encode(packet[:"request-id"]),
+      HrrRbSftp::Protocol::Common::DataTypes::Uint32.encode(packet[:"code"]),
     ].join
   }
 

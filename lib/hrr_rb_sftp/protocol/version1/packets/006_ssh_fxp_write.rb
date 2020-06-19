@@ -18,11 +18,11 @@ module HrrRbSftp
           # Represents SSH_FXP_WRITE packet format.
           #
           FORMAT = [
-            [DataType::Byte,   :"type"      ],
-            [DataType::Uint32, :"request-id"],
-            [DataType::String, :"handle"    ],
-            [DataType::Uint64, :"offset"    ],
-            [DataType::String, :"data"      ],
+            [DataTypes::Byte,   :"type"      ],
+            [DataTypes::Uint32, :"request-id"],
+            [DataTypes::String, :"handle"    ],
+            [DataTypes::Uint64, :"offset"    ],
+            [DataTypes::String, :"data"      ],
           ]
 
           #

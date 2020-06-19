@@ -1,4 +1,4 @@
-RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPair do
+RSpec.describe HrrRbSftp::Protocol::Common::DataTypes::ExtensionPair do
   describe ".encode" do
     context "when arg is an Array of two Strings" do
       arg = {:"extension-name" => "name", :"extension-data" => "data"}
@@ -13,7 +13,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPair do
       }.join(" ")
 
       it "encodes #{arg.inspect} to #{"\"%s\"" % encoded_pretty}" do
-        expect(HrrRbSftp::Protocol::Common::DataType::ExtensionPair.encode arg).to eq encoded
+        expect(HrrRbSftp::Protocol::Common::DataTypes::ExtensionPair.encode arg).to eq encoded
       end
     end
 
@@ -27,7 +27,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPair do
         Object,
       ].each do |value|
         it "encodes #{value.inspect.ljust(6, " ")} raises ArgumentError" do
-          expect { HrrRbSftp::Protocol::Common::DataType::ExtensionPair.encode value }.to raise_error ArgumentError
+          expect { HrrRbSftp::Protocol::Common::DataTypes::ExtensionPair.encode value }.to raise_error ArgumentError
         end
       end
     end
@@ -47,7 +47,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::ExtensionPair do
 
     it "decodes #{("\"%s\"" % encoded_pretty)} to #{arg.inspect}" do
       io = StringIO.new encoded, "r"
-      expect(HrrRbSftp::Protocol::Common::DataType::ExtensionPair.decode io).to eq arg
+      expect(HrrRbSftp::Protocol::Common::DataTypes::ExtensionPair.decode io).to eq arg
     end
   end
 end

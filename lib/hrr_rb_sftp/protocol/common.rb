@@ -9,7 +9,7 @@ module HrrRbSftp
   end
 end
 
-require "hrr_rb_sftp/protocol/common/data_type"
+require "hrr_rb_sftp/protocol/common/data_types"
 require "hrr_rb_sftp/protocol/common/packetable"
 require "hrr_rb_sftp/protocol/common/extensionable"
 require "hrr_rb_sftp/protocol/common/packets"

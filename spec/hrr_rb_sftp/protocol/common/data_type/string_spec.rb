@@ -1,4 +1,4 @@
-RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
+RSpec.describe HrrRbSftp::Protocol::Common::DataTypes::String do
   wljust = Proc.new{ |str, width, padding|
     str_width = str.each_char.to_a.map{|c| c.bytesize == 1 ? 1 : 2}.inject(0, &:+)
     str + padding * [0, width - str_width].max
@@ -36,7 +36,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
           to_str            = "\"#{encoded_array.join(" ")}\""
 
           it "encodes #{from_str} to #{to_str}" do
-            expect(HrrRbSftp::Protocol::Common::DataType::String.encode str).to eq ([str_len_hex].pack("H*") + [str].pack("a*"))
+            expect(HrrRbSftp::Protocol::Common::DataTypes::String.encode str).to eq ([str_len_hex].pack("H*") + [str].pack("a*"))
           end
         end
       end
@@ -48,7 +48,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
           expect(str_mock).to receive(:kind_of?).with(::String).and_return(true).once
           expect(str_mock).to receive(:bytesize).with(no_args).and_return(0xffff_ffff + 1).twice
 
-          expect { HrrRbSftp::Protocol::Common::DataType::String.encode str_mock }.to raise_error ArgumentError
+          expect { HrrRbSftp::Protocol::Common::DataTypes::String.encode str_mock }.to raise_error ArgumentError
         end
       end
     end
@@ -65,7 +65,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
         value_pretty = value.inspect.ljust(6, " ")
 
         it "encodes #{value_pretty} with error" do
-          expect { HrrRbSftp::Protocol::Common::DataType::String.encode value }.to raise_error ArgumentError
+          expect { HrrRbSftp::Protocol::Common::DataTypes::String.encode value }.to raise_error ArgumentError
         end
       end
     end
@@ -90,7 +90,7 @@ RSpec.describe HrrRbSftp::Protocol::Common::DataType::String do
 
       it "decodes #{from_str} to #{to_str}" do
         io = StringIO.new ([str_len_hex].pack("H*") + [str].pack("a*")), "r"
-        expect(HrrRbSftp::Protocol::Common::DataType::String.decode io).to eq str
+        expect(HrrRbSftp::Protocol::Common::DataTypes::String.decode io).to eq str
       end
     end
   end

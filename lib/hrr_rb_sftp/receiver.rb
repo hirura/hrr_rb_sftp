@@ -21,7 +21,7 @@ module HrrRbSftp
     #
     def receive
       begin
-        paylaod_length = Protocol::Common::DataType::Uint32.decode(@io_in)
+        paylaod_length = Protocol::Common::DataTypes::Uint32.decode(@io_in)
       rescue NoMethodError
         nil
       else

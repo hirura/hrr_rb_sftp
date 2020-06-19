@@ -26,9 +26,9 @@ RSpec.describe HrrRbSftp::Protocol::Version1::Packets::SSH_FXP_RMDIR do
   }
   let(:payload){
     [
-      HrrRbSftp::Protocol::Version1::DataType::Byte.encode(packet[:"type"]),
-      HrrRbSftp::Protocol::Version1::DataType::Uint32.encode(packet[:"request-id"]),
-      HrrRbSftp::Protocol::Version1::DataType::String.encode(packet[:"path"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Byte.encode(packet[:"type"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Uint32.encode(packet[:"request-id"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::String.encode(packet[:"path"]),
     ].join
   }
 

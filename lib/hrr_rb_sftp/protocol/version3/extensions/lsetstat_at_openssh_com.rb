@@ -25,8 +25,8 @@ module HrrRbSftp
           REQUEST_FORMAT = {
             :"extended-request" => {
               "lsetstat@openssh.com" => [
-                [DataType::String, :"path" ],
-                [DataType::Attrs,  :"attrs"],
+                [DataTypes::String, :"path" ],
+                [DataTypes::Attrs,  :"attrs"],
               ],
             },
           }

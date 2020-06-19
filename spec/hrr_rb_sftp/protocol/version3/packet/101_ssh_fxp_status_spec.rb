@@ -23,11 +23,11 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_STATUS do
   }
   let(:payload){
     [
-      HrrRbSftp::Protocol::Common::DataType::Byte.encode(packet[:"type"]),
-      HrrRbSftp::Protocol::Common::DataType::Uint32.encode(packet[:"request-id"]),
-      HrrRbSftp::Protocol::Common::DataType::Uint32.encode(packet[:"code"]),
-      HrrRbSftp::Protocol::Common::DataType::String.encode(packet[:"error message"]),
-      HrrRbSftp::Protocol::Common::DataType::String.encode(packet[:"language tag"]),
+      HrrRbSftp::Protocol::Common::DataTypes::Byte.encode(packet[:"type"]),
+      HrrRbSftp::Protocol::Common::DataTypes::Uint32.encode(packet[:"request-id"]),
+      HrrRbSftp::Protocol::Common::DataTypes::Uint32.encode(packet[:"code"]),
+      HrrRbSftp::Protocol::Common::DataTypes::String.encode(packet[:"error message"]),
+      HrrRbSftp::Protocol::Common::DataTypes::String.encode(packet[:"language tag"]),
     ].join
   }
 

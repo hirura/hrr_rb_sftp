@@ -1,4 +1,4 @@
-RSpec.describe HrrRbSftp::Protocol::Version1::DataType::Attrs do
+RSpec.describe HrrRbSftp::Protocol::Version1::DataTypes::Attrs do
   flag_and_field_list = [
     [described_class::SSH_FILEXFER_ATTR_SIZE,        [:"size"                         ]],
     [described_class::SSH_FILEXFER_ATTR_UIDGID,      [:"uid", :"gid"                  ]],

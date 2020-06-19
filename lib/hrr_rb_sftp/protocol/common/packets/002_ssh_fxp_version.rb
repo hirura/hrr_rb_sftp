@@ -18,9 +18,9 @@ module HrrRbSftp
           # Represents SSH_FXP_VERSION packet format.
           #
           FORMAT = [
-            [DataType::Byte,           :"type"      ],
-            [DataType::Uint32,         :"version"   ],
-            [DataType::ExtensionPairs, :"extensions"],
+            [DataTypes::Byte,           :"type"      ],
+            [DataTypes::Uint32,         :"version"   ],
+            [DataTypes::ExtensionPairs, :"extensions"],
           ]
         end
       end

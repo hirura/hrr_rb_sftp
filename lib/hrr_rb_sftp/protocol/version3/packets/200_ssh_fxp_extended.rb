@@ -18,9 +18,9 @@ module HrrRbSftp
           # Represents SSH_FXP_EXTENDED packet format.
           #
           FORMAT = [
-            [DataType::Byte,   :"type"            ],
-            [DataType::Uint32, :"request-id"      ],
-            [DataType::String, :"extended-request"],
+            [DataTypes::Byte,   :"type"            ],
+            [DataTypes::Uint32, :"request-id"      ],
+            [DataTypes::String, :"extended-request"],
           ]
 
           #
@@ -30,8 +30,8 @@ module HrrRbSftp
           #   {
           #     :"extended-request" => {
           #       "hardlink@openssh.com" => [
-          #         [DataType::String, :"oldpath"],
-          #         [DataType::String, :"newpath"],
+          #         [DataTypes::String, :"oldpath"],
+          #         [DataTypes::String, :"newpath"],
           #       ],
           #     },
           #   }

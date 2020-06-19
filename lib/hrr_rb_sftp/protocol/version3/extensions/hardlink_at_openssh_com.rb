@@ -25,8 +25,8 @@ module HrrRbSftp
           REQUEST_FORMAT = {
             :"extended-request" => {
               "hardlink@openssh.com" => [
-                [DataType::String, :"oldpath"],
-                [DataType::String, :"newpath"],
+                [DataTypes::String, :"oldpath"],
+                [DataTypes::String, :"newpath"],
               ],
             },
           }

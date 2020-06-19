@@ -11,9 +11,9 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packetable do
         include HrrRbSftp::Protocol::Common::Packetable
         klass::TYPE = 255
         klass::FORMAT = [
-          [HrrRbSftp::Protocol::Common::DataType::Byte,   :"type"],
-          [HrrRbSftp::Protocol::Common::DataType::Uint32, :"request-id"],
-          [HrrRbSftp::Protocol::Common::DataType::String, :"data"      ],
+          [HrrRbSftp::Protocol::Common::DataTypes::Byte,   :"type"],
+          [HrrRbSftp::Protocol::Common::DataTypes::Uint32, :"request-id"],
+          [HrrRbSftp::Protocol::Common::DataTypes::String, :"data"      ],
         ]
       end
     }
@@ -55,12 +55,12 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packetable do
         include HrrRbSftp::Protocol::Common::Packetable
         klass::TYPE = 255
         klass::FORMAT = [
-          [HrrRbSftp::Protocol::Common::DataType::Byte,   :"type"],
-          [HrrRbSftp::Protocol::Common::DataType::Uint32, :"request-id"],
-          [HrrRbSftp::Protocol::Common::DataType::String, :"data"      ],
+          [HrrRbSftp::Protocol::Common::DataTypes::Byte,   :"type"],
+          [HrrRbSftp::Protocol::Common::DataTypes::Uint32, :"request-id"],
+          [HrrRbSftp::Protocol::Common::DataTypes::String, :"data"      ],
         ]
         klass::TESTING_FORMAT = [
-          [HrrRbSftp::Protocol::Common::DataType::String, :"testing data"],
+          [HrrRbSftp::Protocol::Common::DataTypes::String, :"testing data"],
         ]
         klass::CONDITIONAL_FORMAT = {
           :"data" => {
@@ -107,15 +107,15 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packetable do
         include HrrRbSftp::Protocol::Common::Packetable
         klass::TYPE = 255
         klass::FORMAT = [
-          [HrrRbSftp::Protocol::Common::DataType::Byte,   :"type"],
-          [HrrRbSftp::Protocol::Common::DataType::Uint32, :"request-id"],
-          [HrrRbSftp::Protocol::Common::DataType::String, :"data"      ],
+          [HrrRbSftp::Protocol::Common::DataTypes::Byte,   :"type"],
+          [HrrRbSftp::Protocol::Common::DataTypes::Uint32, :"request-id"],
+          [HrrRbSftp::Protocol::Common::DataTypes::String, :"data"      ],
         ]
         klass::TESTING_FORMAT = [
-          [HrrRbSftp::Protocol::Common::DataType::String, :"testing data"],
+          [HrrRbSftp::Protocol::Common::DataTypes::String, :"testing data"],
         ]
         klass::CHAINED_FORMAT = [
-          [HrrRbSftp::Protocol::Common::DataType::String, :"chained data"],
+          [HrrRbSftp::Protocol::Common::DataTypes::String, :"chained data"],
         ]
         klass::CONDITIONAL_FORMAT = {
           :"data" => {
@@ -165,11 +165,11 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packetable do
         include HrrRbSftp::Protocol::Common::Packetable
         klass::TYPE = 255
         klass::FORMAT = [
-          [HrrRbSftp::Protocol::Common::DataType::Byte,   :"type"],
-          [HrrRbSftp::Protocol::Common::DataType::Uint32, :"request-id"],
+          [HrrRbSftp::Protocol::Common::DataTypes::Byte,   :"type"],
+          [HrrRbSftp::Protocol::Common::DataTypes::Uint32, :"request-id"],
         ]
         klass::HIDDEN_FORMAT = [
-          [HrrRbSftp::Protocol::Common::DataType::String, :"hidden data"],
+          [HrrRbSftp::Protocol::Common::DataTypes::String, :"hidden data"],
         ]
         klass::CONDITIONAL_FORMAT = {
           :"require hidden" => {

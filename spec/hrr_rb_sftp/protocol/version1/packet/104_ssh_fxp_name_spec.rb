@@ -32,15 +32,15 @@ RSpec.describe HrrRbSftp::Protocol::Version1::Packets::SSH_FXP_NAME do
   }
   let(:payload){
     [
-      HrrRbSftp::Protocol::Version1::DataType::Byte.encode(packet[:"type"]),
-      HrrRbSftp::Protocol::Version1::DataType::Uint32.encode(packet[:"request-id"]),
-      HrrRbSftp::Protocol::Version1::DataType::Uint32.encode(packet[:"count"]),
-      HrrRbSftp::Protocol::Version1::DataType::String.encode(packet[:"filename[0]"]),
-      HrrRbSftp::Protocol::Version1::DataType::String.encode(packet[:"longname[0]"]),
-      HrrRbSftp::Protocol::Version1::DataType::Attrs.encode(packet[:"attrs[0]"]),
-      HrrRbSftp::Protocol::Version1::DataType::String.encode(packet[:"filename[1]"]),
-      HrrRbSftp::Protocol::Version1::DataType::String.encode(packet[:"longname[1]"]),
-      HrrRbSftp::Protocol::Version1::DataType::Attrs.encode(packet[:"attrs[1]"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Byte.encode(packet[:"type"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Uint32.encode(packet[:"request-id"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Uint32.encode(packet[:"count"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::String.encode(packet[:"filename[0]"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::String.encode(packet[:"longname[0]"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Attrs.encode(packet[:"attrs[0]"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::String.encode(packet[:"filename[1]"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::String.encode(packet[:"longname[1]"]),
+      HrrRbSftp::Protocol::Version1::DataTypes::Attrs.encode(packet[:"attrs[1]"]),
     ].join
   }
 

@@ -5,8 +5,8 @@ module HrrRbSftp
       #
       # This module implements SFTP protocol version 2 data types to be used to encode or decode packet.
       #
-      module DataType
-        include Version1::DataType
+      module DataTypes
+        include Version1::DataTypes
       end
     end
   end

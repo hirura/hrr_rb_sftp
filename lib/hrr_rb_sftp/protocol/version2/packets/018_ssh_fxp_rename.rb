@@ -18,10 +18,10 @@ module HrrRbSftp
           # Represents SSH_FXP_RENAME packet format.
           #
           FORMAT = [
-            [DataType::Byte,   :"type"      ],
-            [DataType::Uint32, :"request-id"],
-            [DataType::String, :"oldpath"   ],
-            [DataType::String, :"newpath"   ],
+            [DataTypes::Byte,   :"type"      ],
+            [DataTypes::Uint32, :"request-id"],
+            [DataTypes::String, :"oldpath"   ],
+            [DataTypes::String, :"newpath"   ],
           ]
 
           #

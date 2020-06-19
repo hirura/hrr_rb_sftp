@@ -18,9 +18,9 @@ module HrrRbSftp
           # Represents SSH_FXP_NAME packet format.
           #
           FORMAT = [
-            [DataType::Byte,   :"type"      ],
-            [DataType::Uint32, :"request-id"],
-            [DataType::Uint32, :"count"     ],
+            [DataTypes::Byte,   :"type"      ],
+            [DataTypes::Uint32, :"request-id"],
+            [DataTypes::Uint32, :"count"     ],
           ]
 
           #
@@ -29,9 +29,9 @@ module HrrRbSftp
           PER_COUNT_FORMAT = Hash.new{ |hash, key|
             Array.new(key){ |i|
               [
-                [DataType::String, :"filename[#{i}]"],
-                [DataType::String, :"longname[#{i}]"],
-                [DataType::Attrs,  :"attrs[#{i}]"   ],
+                [DataTypes::String, :"filename[#{i}]"],
+                [DataTypes::String, :"longname[#{i}]"],
+                [DataTypes::Attrs,  :"attrs[#{i}]"   ],
               ]
             }.inject(:+)
           }

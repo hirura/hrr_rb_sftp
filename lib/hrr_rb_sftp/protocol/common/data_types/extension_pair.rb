@@ -1,7 +1,7 @@
 module HrrRbSftp
   class Protocol
     module Common
-      module DataType
+      module DataTypes
 
         #
         # This module provides methods to convert extension-name and extension-data pair represented in ::Hash and binary string each other.
@@ -19,7 +19,7 @@ module HrrRbSftp
             unless arg.kind_of? ::Hash
               raise ArgumentError, "must be a kind of Hash, but got #{arg.inspect}"
             end
-            DataType::String.encode(arg[:"extension-name"]) + DataType::String.encode(arg[:"extension-data"])
+            DataTypes::String.encode(arg[:"extension-name"]) + DataTypes::String.encode(arg[:"extension-data"])
           end
 
           #
@@ -30,8 +30,8 @@ module HrrRbSftp
           #
           def self.decode io
             {
-              :"extension-name" => DataType::String.decode(io),
-              :"extension-data" => DataType::String.decode(io),
+              :"extension-name" => DataTypes::String.decode(io),
+              :"extension-data" => DataTypes::String.decode(io),
             }
           end
         end

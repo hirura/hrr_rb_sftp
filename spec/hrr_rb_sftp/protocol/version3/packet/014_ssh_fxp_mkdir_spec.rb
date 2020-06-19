@@ -22,10 +22,10 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_MKDIR do
   }
   let(:payload){
     [
-      HrrRbSftp::Protocol::Version3::DataType::Byte.encode(packet[:"type"]),
-      HrrRbSftp::Protocol::Version3::DataType::Uint32.encode(packet[:"request-id"]),
-      HrrRbSftp::Protocol::Version3::DataType::String.encode(packet[:"path"]),
-      HrrRbSftp::Protocol::Version3::DataType::Attrs.encode(packet[:"attrs"]),
+      HrrRbSftp::Protocol::Version3::DataTypes::Byte.encode(packet[:"type"]),
+      HrrRbSftp::Protocol::Version3::DataTypes::Uint32.encode(packet[:"request-id"]),
+      HrrRbSftp::Protocol::Version3::DataTypes::String.encode(packet[:"path"]),
+      HrrRbSftp::Protocol::Version3::DataTypes::Attrs.encode(packet[:"attrs"]),
     ].join
   }
 

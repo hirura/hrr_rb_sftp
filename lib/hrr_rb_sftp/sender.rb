@@ -19,7 +19,7 @@ module HrrRbSftp
     # Flushes output IO once payload is sent.
     #
     def send payload
-      @io_out.write(Protocol::Common::DataType::Uint32.encode(payload.bytesize))
+      @io_out.write(Protocol::Common::DataTypes::Uint32.encode(payload.bytesize))
       @io_out.write(payload)
       @io_out.flush
     end

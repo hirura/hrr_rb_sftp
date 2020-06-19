@@ -26,8 +26,8 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_EXTENDED_REPLY do
   }
   let(:payload){
     [
-      HrrRbSftp::Protocol::Version3::DataType::Byte.encode(packet[:"type"]),
-      HrrRbSftp::Protocol::Version3::DataType::Uint32.encode(packet[:"request-id"]),
+      HrrRbSftp::Protocol::Version3::DataTypes::Byte.encode(packet[:"type"]),
+      HrrRbSftp::Protocol::Version3::DataTypes::Uint32.encode(packet[:"request-id"]),
     ].join
   }
 
