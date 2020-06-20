@@ -1,7 +1,7 @@
 module HrrRbSftp
   class Protocol
     class Version2
-      module Packets
+      class Packets
 
         #
         # This class implements SFTP protocol version 2 SSH_FXP_RENAME packet type, format, and responder.

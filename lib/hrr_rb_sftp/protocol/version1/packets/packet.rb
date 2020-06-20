@@ -1,7 +1,7 @@
 module HrrRbSftp
   class Protocol
     class Version1
-      module Packets
+      class Packets
 
         #
         # This class implements base packet operations and is to be inherited by each packet class.

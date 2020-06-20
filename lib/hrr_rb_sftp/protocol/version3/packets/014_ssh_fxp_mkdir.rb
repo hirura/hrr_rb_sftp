@@ -1,7 +1,7 @@
 module HrrRbSftp
   class Protocol
     class Version3
-      module Packets
+      class Packets
 
         #
         # This class implements SFTP protocol version 3 SSH_FXP_MKDIR packet type, format, and responder.
