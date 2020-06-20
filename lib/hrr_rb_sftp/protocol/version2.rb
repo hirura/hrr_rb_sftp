@@ -2,9 +2,9 @@ module HrrRbSftp
   class Protocol
 
     #
-    # This class implements SFTP protocol version 2 packet types, formats, and responders.
+    # This module implements SFTP protocol version 2 packet types, formats, and responders.
     #
-    class Version2
+    module Version2
 
       #
       # Represents SFTP protocol version 2.

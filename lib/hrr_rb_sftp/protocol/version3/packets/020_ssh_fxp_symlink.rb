@@ -1,6 +1,6 @@
 module HrrRbSftp
   class Protocol
-    class Version3
+    module Version3
       class Packets
 
         #

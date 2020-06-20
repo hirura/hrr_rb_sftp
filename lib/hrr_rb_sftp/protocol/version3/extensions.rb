@@ -1,6 +1,6 @@
 module HrrRbSftp
   class Protocol
-    class Version3
+    module Version3
 
       #
       # This class implements SFTP protocol version 3 extension formats and responders.
