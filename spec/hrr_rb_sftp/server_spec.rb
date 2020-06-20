@@ -234,7 +234,7 @@ RSpec.describe HrrRbSftp::Server do
 
           it "finishes and raises an error" do
             expect( server ).to receive(:close_handles).with(no_args).once
-            expect{ server.start *io.local.to_a }.to raise_error StandardError
+            expect{ server.start *io.local.to_a }.to raise_error RuntimeError
           end
         end
 
@@ -253,7 +253,7 @@ RSpec.describe HrrRbSftp::Server do
 
           it "finishes and raises an error" do
             expect( server ).to receive(:close_handles).with(no_args).once
-            expect{ server.start *io.local.to_a }.to raise_error StandardError
+            expect{ server.start *io.local.to_a }.to raise_error RuntimeError
           end
         end
       end

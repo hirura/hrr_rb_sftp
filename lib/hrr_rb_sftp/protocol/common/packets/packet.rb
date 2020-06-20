@@ -83,8 +83,7 @@ module HrrRbSftp
                 begin
                   [field_name, data_type.decode(payload_io)]
                 rescue => e
-                  log_debug { "'field_name': #{field_name.inspect}" }
-                  raise e
+                  raise RuntimeError, "Failed decoding #{field_name.inspect} (#{e.message})"
                 end
               }
               decoded_packet + decode_recursively(payload_io, decoded_packet)
