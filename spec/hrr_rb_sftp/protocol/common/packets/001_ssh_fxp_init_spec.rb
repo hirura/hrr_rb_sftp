@@ -1,4 +1,8 @@
 RSpec.describe HrrRbSftp::Protocol::Common::Packets::SSH_FXP_INIT do
+  it "inherits Common::Packets::Packet class" do
+    expect( described_class ).to be < HrrRbSftp::Protocol::Common::Packets::Packet
+  end
+
   let(:type){ 1 }
 
   describe "#{described_class}::TYPE" do
@@ -6,12 +10,6 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packets::SSH_FXP_INIT do
       expect(described_class::TYPE).to eq type
     end
   end
-
-  let(:pkt_args){
-    [
-      {},
-    ]
-  }
 
   let(:packet){
     {
@@ -28,13 +26,13 @@ RSpec.describe HrrRbSftp::Protocol::Common::Packets::SSH_FXP_INIT do
 
   describe "#encode" do
     it "returns payload encoded" do
-      expect(described_class.new(*pkt_args).encode(packet)).to eq payload
+      expect(described_class.new.encode(packet)).to eq payload
     end
   end
 
   describe "#decode" do
     it "returns packet decoded" do
-      expect(described_class.new(*pkt_args).decode(payload)).to eq packet
+      expect(described_class.new.decode(payload)).to eq packet
     end
   end
 end
