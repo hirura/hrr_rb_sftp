@@ -107,16 +107,9 @@ RSpec.describe HrrRbSftp::Server do
           let(:version_class){ HrrRbSftp::Protocol.const_get(:"Version#{version}") }
 
           let(:pkt_args){
-            if version < 3
-              [
-                {},
-              ]
-            else
-              context = {}
-              [
-                context.update({:extensions => HrrRbSftp::Protocol::Version3::Extensions.new(context)}),
-              ]
-            end
+            [
+              {:version => version},
+            ]
           }
 
           it "receives init with version #{version} and returns version with version #{version}" do
@@ -167,16 +160,9 @@ RSpec.describe HrrRbSftp::Server do
         let(:version_class){ HrrRbSftp::Protocol.const_get(:"Version#{version}") }
 
         let(:pkt_args){
-          if version < 3
-            [
-              {},
-            ]
-          else
-            context = {}
-            [
-              context.update({:extensions => HrrRbSftp::Protocol::Version3::Extensions.new(context)}),
-            ]
-          end
+          [
+            {:version => version},
+          ]
         }
 
         context "when input IO is closed before receiving packet length" do
@@ -263,16 +249,9 @@ RSpec.describe HrrRbSftp::Server do
         let(:version_class){ HrrRbSftp::Protocol.const_get(:"Version#{version}") }
 
         let(:pkt_args){
-          if version < 3
-            [
-              {},
-            ]
-          else
-            context = {}
-            [
-              context.update({:extensions => HrrRbSftp::Protocol::Version3::Extensions.new(context)}),
-            ]
-          end
+          [
+            {:version => version},
+          ]
         }
 
         context "when request type is invalid" do

@@ -72,6 +72,15 @@ module HrrRbSftp
           private
 
           #
+          # Returns An instance of Extensions.
+          #
+          # @return [Extensions] An instance of Extensions.
+          #
+          def extensions
+            @extensions ||= Protocol.const_get(:"Version#{version}")::Extensions.new(context, logger: logger)
+          end
+
+          #
           # Overrides Common::Packetable#conditional_format private method and represents SSH_FXP_EXTENDED packet conditional format.
           #
           def conditional_format packet

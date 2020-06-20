@@ -34,8 +34,8 @@ module HrrRbSftp
       @version = version
       @version_class = self.class.const_get(:"Version#{@version}")
       @context = Hash.new
+      @context[:version] = @version
       @context[:handles] = Hash.new
-      @context[:extensions] = @version_class::Extensions.new(@context, logger: logger) if @version_class.const_defined?(:Extensions)
       packet_classes = @version_class::Packets.constants.select{|c| c.to_s.start_with?("SSH_FXP_")}.map{|c| @version_class::Packets.const_get(c)}
       @packets = packet_classes.map{|pkt| [pkt::TYPE, pkt.new(@context, logger: logger)]}.inject(Hash.new){|h,(k,v)| h.update({k => v})}
     end

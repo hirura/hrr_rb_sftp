@@ -13,15 +13,15 @@ RSpec.describe HrrRbSftp::Protocol::Version1::Packets::Packet do
   }
   let(:context){
     {
-      :handles    => handles,
-      :extensions => extensions,
+      :version => version,
+      :handles => handles,
     }
+  }
+  let(:version){
+    "version"
   }
   let(:handles){
     "handles"
-  }
-  let(:extensions){
-    "extensions"
   }
   let(:logger){
     "logger"
@@ -39,15 +39,15 @@ RSpec.describe HrrRbSftp::Protocol::Version1::Packets::Packet do
     end
   end
 
-  describe "#handles" do
-    it "returns handles" do
-      expect( subclass.new(context, logger: logger).handles ).to be handles
+  describe "#version" do
+    it "returns version" do
+      expect( subclass.new(context, logger: logger).version ).to be version
     end
   end
 
-  describe "#extensions" do
-    it "returns extensions" do
-      expect( subclass.new(context, logger: logger).extensions ).to be extensions
+  describe "#handles" do
+    it "returns handles" do
+      expect( subclass.new(context, logger: logger).handles ).to be handles
     end
   end
 end

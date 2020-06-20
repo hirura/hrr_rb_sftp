@@ -12,9 +12,8 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_READLINK do
   end
 
   let(:pkt_args){
-    context = {}
     [
-      context.update({:extensions => HrrRbSftp::Protocol::Version3::Extensions.new(context)}),
+      {:version => HrrRbSftp::Protocol::Version3::PROTOCOL_VERSION},
     ]
   }
 

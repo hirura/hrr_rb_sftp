@@ -17,8 +17,8 @@ module HrrRbSftp
 
         #
         # @param context [Hash] Contextual variables.
+        #   - :version (Integer) - Negotiated protocol version.
         #   - :handles (Hash\\{String=>File, Dir\}) - Opened handles.
-        #   - :extensions (Extensions) - An instance of Extensions.
         # @param logger [Logger] Logger.
         #
         def initialize context, logger: nil
