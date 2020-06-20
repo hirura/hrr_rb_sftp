@@ -1,5 +1,3 @@
-require "timeout"
-
 RSpec.describe HrrRbSftp::Server do
   let(:io){
     io_in  = IO.pipe
@@ -10,6 +8,7 @@ RSpec.describe HrrRbSftp::Server do
       Struct.new(:in, :out, :err).new(io_in[1], io_out[0], io_err[0])
     )
   }
+
   let(:logger){
     if ENV["LOGGING"]
       require "logger"
@@ -94,7 +93,6 @@ RSpec.describe HrrRbSftp::Server do
 
       before :example do
         @thread = Thread.new{
-          Thread.current.report_on_exception = false
           server = described_class.new logger: logger
           server.start *io.local.to_a
         }
@@ -102,13 +100,11 @@ RSpec.describe HrrRbSftp::Server do
 
       after :example do
         @thread.kill
-        @thread.join rescue nil
       end
 
       [1, 2, 3].each do |version|
         context "when remote protocol version is #{version}" do
           let(:version){ version }
-          let(:version_class){ HrrRbSftp::Protocol.const_get(:"Version#{version}") }
 
           let(:pkt_args){
             [
@@ -204,6 +200,62 @@ RSpec.describe HrrRbSftp::Server do
             server.start *io.local.to_a
           end
         end
+
+        context "when request type is not supported" do
+          let(:unsupported_payload){
+            [
+              type,
+              request_id,
+            ].pack("CN")
+          }
+          let(:type){ 0 }
+          let(:request_id){ 1 }
+
+          before :example do
+            io.remote.in.write ([unsupported_payload.bytesize].pack("N") + unsupported_payload)
+          end
+
+          it "finishes and raises an error" do
+            expect( server ).to receive(:close_handles).with(no_args).once
+            expect{ server.start *io.local.to_a }.to raise_error RuntimeError
+          end
+        end
+
+        context "when request does not have request-id" do
+          let(:realpath_payload){
+            [
+              version_class::Packets::SSH_FXP_REALPATH::TYPE,
+            ].pack("C")
+          }
+
+          before :example do
+            io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
+          end
+
+          it "finishes and raises an error" do
+            expect( server ).to receive(:close_handles).with(no_args).once
+            expect{ server.start *io.local.to_a }.to raise_error StandardError
+          end
+        end
+
+        context "when request does not have some fields" do
+          let(:realpath_payload){
+            [
+              version_class::Packets::SSH_FXP_REALPATH::TYPE,
+              request_id,
+            ].pack("CN")
+          }
+          let(:request_id){ 1 }
+
+          before :example do
+            io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
+          end
+
+          it "finishes and raises an error" do
+            expect( server ).to receive(:close_handles).with(no_args).once
+            expect{ server.start *io.local.to_a }.to raise_error StandardError
+          end
+        end
       end
     end
   end
@@ -235,7 +287,6 @@ RSpec.describe HrrRbSftp::Server do
 
     before :example do
       @thread = Thread.new{
-        Thread.current.report_on_exception = false
         server = described_class.new logger: logger
         server.start *io.local.to_a
       }
@@ -246,7 +297,6 @@ RSpec.describe HrrRbSftp::Server do
 
     after :example do
       @thread.kill
-      @thread.join rescue nil
     end
 
     [1, 2, 3].each do |version|
@@ -259,56 +309,6 @@ RSpec.describe HrrRbSftp::Server do
             {:version => version},
           ]
         }
-
-        context "when request type is invalid" do
-          let(:realpath_payload){
-            [
-              type,
-              request_id,
-            ].pack("CN")
-          }
-          let(:type){ 0 }
-          let(:request_id){ 1 }
-
-          it "finishes request and response loop" do
-            io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
-            Timeout.timeout(1) do
-              @thread.join rescue nil
-            end
-          end
-        end
-
-        context "when request does not have request-id" do
-          let(:realpath_payload){
-            [
-              version_class::Packets::SSH_FXP_REALPATH::TYPE,
-            ].pack("C")
-          }
-
-          it "finishes request and response loop" do
-            io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
-            Timeout.timeout(1) do
-              @thread.join rescue nil
-            end
-          end
-        end
-
-        context "when request does not have some fields" do
-          let(:realpath_payload){
-            [
-              version_class::Packets::SSH_FXP_REALPATH::TYPE,
-              request_id,
-            ].pack("CN")
-          }
-          let(:request_id){ 1 }
-
-          it "finishes request and response loop" do
-            io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
-            Timeout.timeout(1) do
-              @thread.join rescue nil
-            end
-          end
-        end
 
         context "when responding to open request" do
           let(:open_packet){
