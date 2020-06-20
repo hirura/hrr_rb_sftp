@@ -6,7 +6,7 @@ module HrrRbSftp
         #
         # This class implements SFTP protocol version 3 SSH_FXP_MKDIR packet type, format, and responder.
         #
-        class SSH_FXP_MKDIR < Version1::Packets::SSH_FXP_MKDIR
+        class SSH_FXP_MKDIR < Version2::Packets::SSH_FXP_MKDIR
 
           #
           # Represents SSH_FXP_MKDIR packet format.

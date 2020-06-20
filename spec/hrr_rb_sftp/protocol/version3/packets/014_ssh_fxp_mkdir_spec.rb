@@ -1,6 +1,6 @@
 RSpec.describe HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_MKDIR do
   it "inherits Version1::Packets::SSH_FXP_MKDIR class" do
-    expect( described_class ).to be < HrrRbSftp::Protocol::Version1::Packets::SSH_FXP_MKDIR
+    expect( described_class ).to be < HrrRbSftp::Protocol::Version2::Packets::SSH_FXP_MKDIR
   end
 
   let(:type){ 14 }
