@@ -16,6 +16,13 @@ module HrrRbSftp
         end
 
         #
+        # @return [Array] A list of extension-pair that the library supports.
+        #
+        def self.extension_pairs
+          extension_classes.map{|c| {:"extension-name" => c::EXTENSION_NAME, :"extension-data" => c::EXTENSION_DATA}}
+        end
+
+        #
         # @param context [Hash] Contextual variables.
         #   - :version (Integer) - Negotiated protocol version.
         #   - :handles (Hash\\{String=>File, Dir\}) - Opened handles.

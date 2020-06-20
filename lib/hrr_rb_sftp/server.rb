@@ -71,10 +71,10 @@ module HrrRbSftp
       version = [remote_version, local_version].min
       log_info { "negotiated version: #{version}" }
 
-      extensions = Protocol.list_extensions(version)
-      log_info { "extensions: #{extensions}" }
+      extension_pairs = Protocol.extension_pairs(version)
+      log_info { "extension-pairs: #{extension_pairs}" }
 
-      send_fxp_version version, extensions
+      send_fxp_version version, extension_pairs
 
       version
     end

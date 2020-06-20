@@ -1,6 +1,7 @@
 RSpec.describe HrrRbSftp::Protocol::Version3::Extensions do
   dummy_class_name = :"Dummy"
   dummy_extension_name = "dummy@dummy.dummy"
+  dummy_extension_data = "1"
   dummy_request_format = {
     :"extended-request" => {
       dummy_extension_name => [
@@ -23,6 +24,7 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extensions do
   before :all do
     dummy_class = Class.new(described_class::Extension) do |klass|
       klass::EXTENSION_NAME = dummy_extension_name
+      klass::EXTENSION_DATA = dummy_extension_data
       klass::REQUEST_FORMAT = dummy_request_format
       klass::REPLY_FORMAT   = dummy_reply_format
       def respond_to request
@@ -39,6 +41,12 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extensions do
   describe ".extension_classes" do
     it "includes classes that has EXTENSION_NAME constant" do
       expect( described_class.extension_classes.all?{|c| c.const_defined?(:EXTENSION_NAME)} ).to be true
+    end
+  end
+
+  describe ".extension_pairs" do
+    it "returns a list of extension-pair of EXTENSION_NAME and EXTENSION_DATA" do
+      expect( described_class.extension_pairs ).to include({:"extension-name" => dummy_extension_name, :"extension-data" => dummy_extension_data})
     end
   end
 

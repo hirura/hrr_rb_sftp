@@ -14,12 +14,12 @@ module HrrRbSftp
     end
 
     #
-    # @return [Array] A list of extensions that the library supports.
+    # @return [Array] A list of extension-pair that the library supports.
     #
-    def self.list_extensions version
-      version_class = self.const_get(:"Version#{version}")
+    def self.extension_pairs version
+      version_class = const_get(:"Version#{version}")
       if version_class.const_defined?(:Extensions)
-        version_class::Extensions.extension_classes.map{|c| {:"extension-name" => c::EXTENSION_NAME, :"extension-data" => c::EXTENSION_DATA}}
+        version_class::Extensions.extension_pairs
       else
         []
       end
