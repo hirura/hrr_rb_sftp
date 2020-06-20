@@ -81,13 +81,13 @@ RSpec.describe HrrRbSftp::Protocol::Version3::Extensions do
 
   describe "#conditional_request_format" do
     it "includes REQUEST_FORMAT" do
-      expect( described_class.new(context).conditional_request_format[:"extended-request"][dummy_extension_name] ).to match_array(dummy_request_format[:"extended-request"][dummy_extension_name])
+      expect( described_class.new(context).conditional_request_format[:"extended-request"] ).to include(dummy_request_format[:"extended-request"])
     end
   end
 
   describe "#conditional_reply_format" do
     it "includes REPLY_FORMAT" do
-      expect( described_class.new(context).conditional_reply_format[:"extended-reply"][dummy_extension_name] ).to match_array(dummy_reply_format[:"extended-reply"][dummy_extension_name])
+      expect( described_class.new(context).conditional_reply_format[:"extended-reply"] ).to include(dummy_reply_format[:"extended-reply"])
     end
   end
 end

@@ -28,8 +28,8 @@ module HrrRbSftp
           @conditional_reply_format   = conditional_reply_format
           @extensions = extension_classes.map{ |c|
                           extension = c.new(context, logger: logger)
-                          (c::REQUEST_FORMAT[:"extended-request"] || {}).keys.map{|key| {key => extension} }.inject({}, &:merge)
-                        }.inject({}, &:merge)
+                          (c::REQUEST_FORMAT[:"extended-request"] || {}).keys.map{|key| {key => extension} }.inject({}, :merge)
+                        }.inject({}, :merge)
         end
 
         #
@@ -52,14 +52,14 @@ module HrrRbSftp
         # @return [Hash{Symbol=>Hash{String=>Array<Array(Object, Symbol)>}}] Conditional format used in extended-request packet.
         #
         def conditional_request_format
-          @conditional_request_format ||= Hash.new{|h,k| h[k] = Hash.new{|h2,k2| h2[k2] = request_formats.select{|f| f.has_key? k}.map{|f| f[k]}.inject({}, &:merge)[k2]}}
+          @conditional_request_format ||= request_formats.inject({}){|h1,h2| h1.merge(h2){|k,v1,v2| v1.merge(v2)}}
         end
 
         #
         # @return [Hash{Symbol=>Hash{String=>Array<Array(Object, Symbol)>}}] Conditional format used in extended-reply packet.
         #
         def conditional_reply_format
-          @conditional_reply_format ||= Hash.new{|h,k| h[k] = Hash.new{|h2,k2| h2[k2] = reply_formats.select{|f| f.has_key? k}.map{|f| f[k]}.inject({}, &:merge)[k2]}}
+          @conditional_reply_format ||= reply_formats.inject({}){|h1,h2| h1.merge(h2){|k,v1,v2| v1.merge(v2)}}
         end
 
         private
