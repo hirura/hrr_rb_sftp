@@ -1,6 +1,6 @@
 RSpec.describe HrrRbSftp::Protocol::Version3::Packets::SSH_FXP_READLINK do
-  it "includes Common::Packetable module" do
-    expect( described_class ).to include(HrrRbSftp::Protocol::Common::Packetable)
+  it "inherits Version3::Packets::Packet class" do
+    expect( described_class ).to be < HrrRbSftp::Protocol::Version3::Packets::Packet
   end
 
   let(:type){ 19 }

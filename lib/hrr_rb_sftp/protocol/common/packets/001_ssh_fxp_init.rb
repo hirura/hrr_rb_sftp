@@ -6,8 +6,7 @@ module HrrRbSftp
         #
         # This class implements SFTP protocol version independent SSH_FXP_INIT packet type, format, and responder.
         #
-        class SSH_FXP_INIT
-          include Packetable
+        class SSH_FXP_INIT < Packet
 
           #
           # Represents SSH_FXP_INIT packet type.

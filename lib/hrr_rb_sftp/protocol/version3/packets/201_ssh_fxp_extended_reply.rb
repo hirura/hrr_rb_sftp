@@ -6,8 +6,7 @@ module HrrRbSftp
         #
         # This class implements SFTP protocol version 1 SSH_FXP_EXTENDED_REPLY packet type, format, and responder.
         #
-        class SSH_FXP_EXTENDED_REPLY
-          include Common::Packetable
+        class SSH_FXP_EXTENDED_REPLY < Packets::Packet
 
           #
           # Represents SSH_FXP_EXTENDED_REPLY packet type.

@@ -6,8 +6,7 @@ module HrrRbSftp
         #
         # This class implements SFTP protocol version 1 SSH_FXP_NAME packet type, format, and responder.
         #
-        class SSH_FXP_NAME
-          include Common::Packetable
+        class SSH_FXP_NAME < Packet
 
           #
           # Represents SSH_FXP_NAME packet type.

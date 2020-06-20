@@ -87,7 +87,7 @@ RSpec.describe HrrRbSftp::Server do
         }
       }
       let(:init_payload){
-        HrrRbSftp::Protocol::Common::Packets::SSH_FXP_INIT.new(*pkt_args).encode(init_packet)
+        HrrRbSftp::Protocol::Common::Packets::SSH_FXP_INIT.new.encode(init_packet)
       }
 
       before :example do
@@ -124,7 +124,7 @@ RSpec.describe HrrRbSftp::Server do
             payload_length = io.remote.out.read(4).unpack("N")[0]
             payload = io.remote.out.read(payload_length)
             expect( payload[0].unpack("C")[0] ).to eq HrrRbSftp::Protocol::Common::Packets::SSH_FXP_VERSION::TYPE
-            packet = HrrRbSftp::Protocol::Common::Packets::SSH_FXP_VERSION.new(*pkt_args).decode(payload)
+            packet = HrrRbSftp::Protocol::Common::Packets::SSH_FXP_VERSION.new.decode(payload)
             expect( packet[:"version"]    ).to eq version
             if version < 3
               expect( packet[:"extensions"] ).to eq []
@@ -152,7 +152,7 @@ RSpec.describe HrrRbSftp::Server do
       }
     }
     let(:init_payload){
-      HrrRbSftp::Protocol::Common::Packets::SSH_FXP_INIT.new(*pkt_args).encode(init_packet)
+      HrrRbSftp::Protocol::Common::Packets::SSH_FXP_INIT.new.encode(init_packet)
     }
 
     let(:server){ described_class.new logger: logger }
@@ -240,7 +240,7 @@ RSpec.describe HrrRbSftp::Server do
       }
     }
     let(:init_payload){
-      HrrRbSftp::Protocol::Common::Packets::SSH_FXP_INIT.new(*pkt_args).encode(init_packet)
+      HrrRbSftp::Protocol::Common::Packets::SSH_FXP_INIT.new.encode(init_packet)
     }
 
     before :example do

@@ -6,8 +6,7 @@ module HrrRbSftp
         #
         # This class implements SFTP protocol version 1 SSH_FXP_FSETSTAT packet type, format, and responder.
         #
-        class SSH_FXP_FSETSTAT
-          include Common::Packetable
+        class SSH_FXP_FSETSTAT < Packet
 
           #
           # Represents SSH_FXP_FSETSTAT packet type.

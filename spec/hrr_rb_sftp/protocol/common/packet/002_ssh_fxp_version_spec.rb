@@ -1,8 +1,4 @@
 RSpec.describe HrrRbSftp::Protocol::Common::Packets::SSH_FXP_VERSION do
-  it "includes Common::Packetable module" do
-    expect( described_class ).to include(HrrRbSftp::Protocol::Common::Packetable)
-  end
-
   let(:type){ 2 }
 
   describe "#{described_class}::TYPE" do

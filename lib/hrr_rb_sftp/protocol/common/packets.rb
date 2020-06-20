@@ -11,5 +11,6 @@ module HrrRbSftp
   end
 end
 
+require "hrr_rb_sftp/protocol/common/packets/packet"
 require "hrr_rb_sftp/protocol/common/packets/001_ssh_fxp_init"
 require "hrr_rb_sftp/protocol/common/packets/002_ssh_fxp_version"

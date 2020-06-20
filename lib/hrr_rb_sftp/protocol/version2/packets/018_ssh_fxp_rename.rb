@@ -6,8 +6,7 @@ module HrrRbSftp
         #
         # This class implements SFTP protocol version 2 SSH_FXP_RENAME packet type, format, and responder.
         #
-        class SSH_FXP_RENAME
-          include Common::Packetable
+        class SSH_FXP_RENAME < Packets::Packet
 
           #
           # Represents SSH_FXP_RENAME packet type.
