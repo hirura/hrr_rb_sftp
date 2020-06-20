@@ -1,3 +1,5 @@
+require "timeout"
+
 RSpec.describe HrrRbSftp::Server do
   let(:io){
     io_in  = IO.pipe
@@ -92,6 +94,7 @@ RSpec.describe HrrRbSftp::Server do
 
       before :example do
         @thread = Thread.new{
+          Thread.current.report_on_exception = false
           server = described_class.new logger: logger
           server.start *io.local.to_a
         }
@@ -99,6 +102,7 @@ RSpec.describe HrrRbSftp::Server do
 
       after :example do
         @thread.kill
+        @thread.join rescue nil
       end
 
       [1, 2, 3].each do |version|
@@ -231,6 +235,7 @@ RSpec.describe HrrRbSftp::Server do
 
     before :example do
       @thread = Thread.new{
+        Thread.current.report_on_exception = false
         server = described_class.new logger: logger
         server.start *io.local.to_a
       }
@@ -241,6 +246,7 @@ RSpec.describe HrrRbSftp::Server do
 
     after :example do
       @thread.kill
+      @thread.join rescue nil
     end
 
     [1, 2, 3].each do |version|
@@ -264,17 +270,10 @@ RSpec.describe HrrRbSftp::Server do
           let(:type){ 0 }
           let(:request_id){ 1 }
 
-          it "returns status response" do
+          it "finishes request and response loop" do
             io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
-            payload_length = io.remote.out.read(4).unpack("N")[0]
-            payload = io.remote.out.read(payload_length)
-            expect( payload[0].unpack("C")[0] ).to eq version_class::Packets::SSH_FXP_STATUS::TYPE
-            packet = version_class::Packets::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
-            expect( packet[:"request-id"] ).to eq request_id
-            expect( packet[:"code"]       ).to eq version_class::Packets::SSH_FXP_STATUS::SSH_FX_OP_UNSUPPORTED
-            if version >= 3
-              expect( packet[:"error message"] ).to eq "Unsupported type: #{type}"
-              expect( packet[:"language tag"]  ).to eq ""
+            Timeout.timeout(1) do
+              @thread.join rescue nil
             end
           end
         end
@@ -286,17 +285,10 @@ RSpec.describe HrrRbSftp::Server do
             ].pack("C")
           }
 
-          it "returns status response" do
+          it "finishes request and response loop" do
             io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
-            payload_length = io.remote.out.read(4).unpack("N")[0]
-            payload = io.remote.out.read(payload_length)
-            expect( payload[0].unpack("C")[0] ).to eq version_class::Packets::SSH_FXP_STATUS::TYPE
-            packet = version_class::Packets::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
-            expect( packet[:"request-id"] ).to eq 0
-            expect( packet[:"code"]       ).to eq version_class::Packets::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
-            if version >= 3
-              expect( packet[:"error message"] ).to eq "undefined method `unpack' for nil:NilClass"
-              expect( packet[:"language tag"]  ).to eq ""
+            Timeout.timeout(1) do
+              @thread.join rescue nil
             end
           end
         end
@@ -310,17 +302,10 @@ RSpec.describe HrrRbSftp::Server do
           }
           let(:request_id){ 1 }
 
-          it "returns status response" do
+          it "finishes request and response loop" do
             io.remote.in.write ([realpath_payload.bytesize].pack("N") + realpath_payload)
-            payload_length = io.remote.out.read(4).unpack("N")[0]
-            payload = io.remote.out.read(payload_length)
-            expect( payload[0].unpack("C")[0] ).to eq version_class::Packets::SSH_FXP_STATUS::TYPE
-            packet = version_class::Packets::SSH_FXP_STATUS.new(*pkt_args).decode(payload)
-            expect( packet[:"request-id"] ).to eq request_id
-            expect( packet[:"code"]       ).to eq version_class::Packets::SSH_FXP_STATUS::SSH_FX_BAD_MESSAGE
-            if version >= 3
-              expect( packet[:"error message"] ).to eq "undefined method `unpack' for nil:NilClass"
-              expect( packet[:"language tag"]  ).to eq ""
+            Timeout.timeout(1) do
+              @thread.join rescue nil
             end
           end
         end
