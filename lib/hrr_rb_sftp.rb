@@ -15,10 +15,10 @@
 # hrr_rb_sftp can be an alternative with replacing the line in the config file. (After editing the config, reloading or restarting sshd is required.)
 #
 # The following extensions are supported.
-#   - hardlink@openssh.com
-#   - fsync@openssh.com
-#   - posix-rename@openssh.com
-#   - lsetstat@openssh.com
+# - hardlink@openssh.com
+# - fsync@openssh.com
+# - posix-rename@openssh.com
+# - lsetstat@openssh.com
 #
 # @note
 #   - Reversal of SSH_FXP_SYMLINK arguments  
